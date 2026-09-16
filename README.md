@@ -16,7 +16,7 @@ py -m http.server 4173 --directory dist
 
 ## Публикация в интернете
 
-Проект подготовлен к бесплатной публикации через GitHub Pages. После подключения публичного репозитория `valkinaz/armat` включите в его настройках Pages источник **GitHub Actions**.
+Проект опубликован бесплатно через GitHub Pages: [valkinaz.github.io/armat](https://valkinaz.github.io/armat/). В публичном репозитории `valkinaz/armat` источником Pages выбран **GitHub Actions**.
 
 Workflow `.github/workflows/deploy-pages.yml` автоматически публикует папку `dist` после каждого `git push` в `main`. Сайт будет доступен по адресу `https://valkinaz.github.io/armat/`.
 
