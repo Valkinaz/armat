@@ -1,0 +1,14 @@
+[
+  { "upper": "Ա", "lower": "ա", "sound": "А" },
+  { "upper": "Ս", "lower": "ս", "sound": "С" },
+  { "upper": "Մ", "lower": "մ", "sound": "М" },
+  { "upper": "Ո", "lower": "ո", "sound": "Во" },
+  { "upper": "Օ", "lower": "օ", "sound": "О" },
+  { "upper": "Ու", "lower": "ու", "sound": "У" },
+  { "upper": "Ռ", "lower": "ռ", "sound": "Р" },
+  { "upper": "Ր", "lower": "ր", "sound": "Р (мягк.)" },
+  { "upper": "Ի", "lower": "ի", "sound": "И" },
+  { "upper": "Կ", "lower": "կ", "sound": "К" },
+  { "upper": "Ն", "lower": "ն", "sound": "Н" },
+  { "upper": "Ը", "lower": "ը", "sound": "Ы → о" }
+]

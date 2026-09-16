@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#133c39" />
+    <meta name="description" content="Тренажёр армянских букв" />
+    <title>Արմատ — тренажёр армянских букв</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23133c39'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='serif' font-size='38' fill='%23f8c95c'%3EԱ%3C/text%3E%3C/svg%3E" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Armenian:wght@500;600;700&family=Onest:wght@400;500;600;700&display=swap');
+
+      :root { --ink:#123836; --muted:#607673; --paper:#f8f5ed; --cream:#fffdf8; --sun:#f7c75c; --sun-dark:#e8af36; --line:#dfe4d8; --green:#267555; --red:#c75046; }
+      * { box-sizing:border-box; }
+      body { margin:0; min-height:100vh; color:var(--ink); background:radial-gradient(circle at 90% 5%, #f8d882 0, transparent 25rem), var(--paper); font-family:Onest,Arial,sans-serif; }
+      button { font:inherit; }
+      .shell { max-width:1100px; margin:0 auto; padding:32px 24px 48px; }
+      .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:42px; }
+      .brand { display:flex; align-items:center; gap:11px; font-weight:700; letter-spacing:.02em; }
+      .brand-mark { display:grid; place-items:center; width:39px; height:39px; border-radius:12px; background:var(--ink); color:var(--sun); font:700 24px 'Noto Serif Armenian',serif; }
+      h1 { max-width:720px; margin:0; font-size:clamp(2rem,5vw,3.65rem); line-height:1.08; letter-spacing:-.055em; }
+      .intro { max-width:600px; margin:16px 0 34px; color:var(--muted); font-size:1.05rem; line-height:1.55; }
+      .selection-bar { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:17px; }
+      .selection-bar h2 { margin:0; font-size:1.05rem; }
+      .counter { color:var(--muted); font-size:.9rem; }
+      .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:13px; }
+      .letter-card { min-height:170px; padding:20px; cursor:pointer; text-align:left; border:1.5px solid var(--line); border-radius:18px; color:var(--ink); background:var(--cream); transition:transform .16s, border-color .16s, background .16s, box-shadow .16s; }
+      .letter-card:hover { transform:translateY(-3px); border-color:#b9c9bc; box-shadow:0 9px 22px #173d3820; }
+      .letter-card.selected { border-color:var(--ink); background:#e7f0e6; box-shadow:inset 0 0 0 1px var(--ink); }
+      .glyph { display:block; font:600 clamp(2.65rem,5.5vw,4.2rem)/.98 'Noto Serif Armenian',Georgia,serif; letter-spacing:.03em; }
+      .sound { display:block; margin-top:19px; color:var(--muted); font-size:.92rem; }
+      .letter-card.selected .sound { color:var(--ink); }
+      .start-row { display:flex; justify-content:flex-end; margin-top:27px; }
+      .primary { border:0; border-radius:12px; padding:14px 21px; cursor:pointer; color:#16342f; background:var(--sun); font-weight:700; box-shadow:0 4px 0 var(--sun-dark); transition:transform .13s, box-shadow .13s, opacity .13s; }
+      .primary:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 6px 0 var(--sun-dark); }
+      .primary:active:not(:disabled) { transform:translateY(2px); box-shadow:0 2px 0 var(--sun-dark); }
+      .primary:disabled { cursor:not-allowed; opacity:.52; box-shadow:none; }
+      .training { display:none; max-width:660px; margin:0 auto; }
+      .training.active, .completion.active { display:block; }
+      .progress { display:flex; align-items:center; justify-content:space-between; margin-bottom:31px; color:var(--muted); font-size:.9rem; }
+      .track { overflow:hidden; width:170px; height:7px; border-radius:10px; background:#dce3d8; }
+      .fill { height:100%; border-radius:inherit; background:var(--sun); transition:width .25s; }
+      .question-card { padding:clamp(26px,7vw,54px); text-align:center; border:1px solid var(--line); border-radius:25px; background:var(--cream); box-shadow:0 16px 45px #25433b12; }
+      .prompt { margin:0 0 18px; color:var(--muted); font-size:.95rem; }
+      .training-glyph { font:600 clamp(5rem,15vw,8.5rem)/1 'Noto Serif Armenian',Georgia,serif; }
+      .options { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:27px; }
+      .option { min-height:62px; cursor:pointer; border:1.5px solid var(--line); border-radius:14px; color:var(--ink); background:#fffefa; font-size:1.05rem; font-weight:600; transition:background .15s, border .15s, transform .15s; }
+      .option:hover:not(:disabled) { transform:translateY(-2px); border-color:#9eb2a6; }
+      .option:disabled { cursor:default; }
+      .option.correct { border-color:var(--green); background:#dff2e6; color:#175438; }
+      .option.wrong { border-color:var(--red); background:#f9e2dd; color:#983d36; }
+      .feedback { min-height:29px; margin:18px 0 0; font-size:.97rem; font-weight:600; }
+      .feedback.good { color:var(--green); } .feedback.bad { color:var(--red); }
+      .next-row { display:flex; justify-content:center; margin-top:26px; }
+      .completion { display:none; max-width:620px; margin:75px auto; padding:45px 32px; text-align:center; border-radius:24px; background:var(--cream); border:1px solid var(--line); }
+      .completion .medal { font-size:3rem; } .completion h2 { margin:13px 0 8px; font-size:2rem; letter-spacing:-.04em; } .completion p { color:var(--muted); }
+      .back { cursor:pointer; border:0; padding:6px 0; color:var(--muted); background:transparent; font-size:.9rem; }
+      .back:hover { color:var(--ink); }
+      .hidden { display:none !important; }
+      @media (max-width:650px) { .shell{padding:22px 16px 35px}.topbar{margin-bottom:31px}.cards{grid-template-columns:repeat(2,1fr);gap:10px}.letter-card{min-height:145px;padding:17px}.glyph{font-size:3.2rem}.start-row{justify-content:stretch}.primary{width:100%}.options{grid-template-columns:1fr}.question-card{padding:31px 20px}.training{padding-top:7px} }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar"><div class="brand"><span class="brand-mark">Ա</span><span>Արմատ</span></div></header>
+      <section id="home">
+        <h1>Выбери буквы<br>для тренировки</h1>
+        <p class="intro">Нажми на карточки, которые хочешь повторить. Когда будешь готов — начни тренировку.</p>
+        <div class="selection-bar"><h2>Изученные буквы</h2><span class="counter" id="counter">Выбрано: 0</span></div>
+        <div class="cards" id="cards" aria-label="Выбор букв"></div>
+        <div class="start-row"><button class="primary" id="start" disabled>Начать тренировку</button></div>
+      </section>
+      <section class="training" id="training">
+        <button class="back" id="back">← К выбору букв</button>
+        <div class="progress"><span id="progress-label">Буква 1 из 1</span><div class="track"><div class="fill" id="fill"></div></div></div>
+        <div class="question-card"><p class="prompt">Как произносится эта буква?</p><div class="training-glyph" id="question-glyph"></div><div class="options" id="options"></div><p class="feedback" id="feedback" aria-live="polite"></p></div>
+        <div class="next-row"><button class="primary hidden" id="next">Следующая буква →</button></div>
+      </section>
+      <section class="completion" id="completion"><div class="medal">✦</div><h2>Тренировка завершена</h2><p id="result"></p><button class="primary" id="again">Выбрать буквы снова</button></section>
+    </main>
+    <script>
+      let alphabet = [], selected = new Set(), queue = [], current = 0, correct = 0, answered = false;
+      const $ = (id) => document.getElementById(id);
+      // Встроенная копия нужна только для открытия index.html двойным щелчком:
+      // в таком режиме браузеры обычно запрещают читать соседний JSON-файл.
+      const starterAlphabet = [
+        {upper:'Ա',lower:'ա',sound:'А'}, {upper:'Ս',lower:'ս',sound:'С'},
+        {upper:'Մ',lower:'մ',sound:'М'}, {upper:'Ո',lower:'ո',sound:'Во'},
+        {upper:'Օ',lower:'օ',sound:'О'}, {upper:'Ու',lower:'ու',sound:'У'},
+        {upper:'Ռ',lower:'ռ',sound:'Р'}, {upper:'Ր',lower:'ր',sound:'Р (мягк.)'},
+        {upper:'Ի',lower:'ի',sound:'И'}, {upper:'Կ',lower:'կ',sound:'К'},
+        {upper:'Ն',lower:'ն',sound:'Н'}, {upper:'Ը',lower:'ը',sound:'Ы → о'}
+      ];
+      async function load() { try { alphabet = await fetch('alphabet.json').then(r => { if (!r.ok) throw new Error(); return r.json(); }); } catch { alphabet = starterAlphabet; } renderCards(); }
+      function renderCards() { $('cards').innerHTML = ''; alphabet.forEach((letter, i) => { const b = document.createElement('button'); b.className = 'letter-card' + (selected.has(i) ? ' selected' : ''); b.innerHTML = `<span class="glyph">${letter.upper} ${letter.lower}</span><span class="sound">${letter.sound}</span>`; b.setAttribute('aria-pressed', selected.has(i)); b.onclick = () => { selected.has(i) ? selected.delete(i) : selected.add(i); renderCards(); updateStart(); }; $('cards').append(b); }); updateStart(); }
+      function updateStart() { const n = selected.size; $('counter').textContent = `Выбрано: ${n}`; $('start').disabled = n === 0; $('start').textContent = n ? `Начать тренировку · ${n}` : 'Начать тренировку'; }
+      function shuffled(items) { return [...items].sort(() => Math.random() - .5); }
+      function startTraining() { queue = shuffled([...selected].map(i => alphabet[i])); current = 0; correct = 0; $('home').classList.add('hidden'); $('completion').classList.remove('active'); $('training').classList.add('active'); renderQuestion(); }
+      function renderQuestion() { answered = false; const item = queue[current]; $('progress-label').textContent = `Буква ${current + 1} из ${queue.length}`; $('fill').style.width = `${((current) / queue.length) * 100}%`; $('question-glyph').textContent = `${item.upper} ${item.lower}`; $('feedback').textContent = ''; $('feedback').className = 'feedback'; $('next').classList.add('hidden'); const distractors = shuffled(alphabet.filter(x => x.sound !== item.sound)).slice(0, 3); const choices = shuffled([item, ...distractors]); $('options').innerHTML = ''; choices.forEach(choice => { const btn = document.createElement('button'); btn.className = 'option'; btn.textContent = choice.sound; btn.onclick = () => answer(btn, choice, item); $('options').append(btn); }); }
+      function answer(button, picked, item) { if (answered) return; answered = true; const good = picked.sound === item.sound; if (good) correct++; document.querySelectorAll('.option').forEach(btn => { btn.disabled = true; if (btn.textContent === item.sound) btn.classList.add('correct'); }); if (!good) button.classList.add('wrong'); $('feedback').textContent = good ? 'Верно! Отлично.' : `Почти — правильный ответ: ${item.sound}`; $('feedback').classList.add(good ? 'good' : 'bad'); $('next').textContent = current === queue.length - 1 ? 'Посмотреть результат' : 'Следующая буква →'; $('next').classList.remove('hidden'); }
+      function next() { current++; if (current < queue.length) renderQuestion(); else finish(); }
+      function finish() { $('training').classList.remove('active'); $('completion').classList.add('active'); $('result').textContent = `Правильных ответов: ${correct} из ${queue.length}.`; }
+      $('start').onclick = startTraining; $('next').onclick = next; $('back').onclick = () => { $('training').classList.remove('active'); $('home').classList.remove('hidden'); }; $('again').onclick = () => { $('completion').classList.remove('active'); $('home').classList.remove('hidden'); };
+      load();
+    </script>
+  </body>
+</html>

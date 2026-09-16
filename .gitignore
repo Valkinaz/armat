@@ -1,0 +1,5 @@
+# Служебные файлы ОС и локального запуска
+.DS_Store
+Thumbs.db
+__pycache__/
+.sites-runtime/
