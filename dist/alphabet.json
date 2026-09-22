@@ -1,14 +1,20 @@
 [
   { "upper": "Ա", "lower": "ա", "sound": "А" },
+  { "upper": "Բ", "lower": "բ", "sound": "Б" },
+  { "upper": "Գ", "lower": "գ", "sound": "Г" },
+  { "upper": "Դ", "lower": "դ", "sound": "Д" },
   { "upper": "Ե", "lower": "ե", "sound": "Е" },
   { "upper": "Զ", "lower": "զ", "sound": "З" },
   { "upper": "Է", "lower": "է", "sound": "Э" },
   { "upper": "Ը", "lower": "ը", "sound": "Ы → о" },
+  { "upper": "Թ", "lower": "թ", "sound": "тh" },
   { "upper": "Ժ", "lower": "ժ", "sound": "Ж" },
   { "upper": "Ի", "lower": "ի", "sound": "И" },
   { "upper": "Լ", "lower": "լ", "sound": "Л" },
+  { "upper": "Ծ", "lower": "ծ", "sound": "тц" },
   { "upper": "Կ", "lower": "կ", "sound": "К" },
   { "upper": "Հ", "lower": "հ", "sound": "h" },
+  { "upper": "Ձ", "lower": "ձ", "sound": "дз" },
   { "upper": "Մ", "lower": "մ", "sound": "М" },
   { "upper": "Յ", "lower": "յ", "sound": "Й" },
   { "upper": "Ն", "lower": "ն", "sound": "Н" },
@@ -23,5 +29,7 @@
   { "upper": "Ր", "lower": "ր", "sound": "Р (мягк.)" },
   { "upper": "Ց", "lower": "ց", "sound": "Ц" },
   { "upper": "Ու", "lower": "ու", "sound": "У" },
+  { "upper": "Փ", "lower": "փ", "sound": "пh" },
+  { "upper": "Ք", "lower": "ք", "sound": "кh" },
   { "upper": "Օ", "lower": "օ", "sound": "О" }
 ]
