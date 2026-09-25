@@ -95,17 +95,21 @@
         {upper:'Ը',lower:'ը',sound:'Ы → о'}, {upper:'Թ',lower:'թ',sound:'тh'},
         {upper:'Ժ',lower:'ժ',sound:'Ж'},
         {upper:'Ի',lower:'ի',sound:'И'}, {upper:'Լ',lower:'լ',sound:'Л'},
+        {upper:'Խ',lower:'խ',sound:'Х'},
         {upper:'Ծ',lower:'ծ',sound:'тц'}, {upper:'Կ',lower:'կ',sound:'К'},
         {upper:'Հ',lower:'հ',sound:'h'}, {upper:'Ձ',lower:'ձ',sound:'дз'},
+        {upper:'Ղ',lower:'ղ',sound:'Р (гх)'}, {upper:'Ճ',lower:'ճ',sound:'тч'},
         {upper:'Մ',lower:'մ',sound:'М'}, {upper:'Յ',lower:'յ',sound:'Й'},
         {upper:'Ն',lower:'ն',sound:'Н'}, {upper:'Շ',lower:'շ',sound:'Ш'},
         {upper:'Ո',lower:'ո',sound:'Во'}, {upper:'Չ',lower:'չ',sound:'Ч'},
-        {upper:'Պ',lower:'պ',sound:'П'}, {upper:'Ռ',lower:'ռ',sound:'Р'},
+        {upper:'Պ',lower:'պ',sound:'П'}, {upper:'Ջ',lower:'ջ',sound:'дж'},
+        {upper:'Ռ',lower:'ռ',sound:'Р'},
         {upper:'Ս',lower:'ս',sound:'С'}, {upper:'Վ',lower:'վ',sound:'В'},
         {upper:'Տ',lower:'տ',sound:'Т'}, {upper:'Ր',lower:'ր',sound:'Р (мягк.)'},
         {upper:'Ց',lower:'ց',sound:'Ц'}, {upper:'Ու',lower:'ու',sound:'У'},
         {upper:'Փ',lower:'փ',sound:'пh'}, {upper:'Ք',lower:'ք',sound:'кh'},
-        {upper:'Օ',lower:'օ',sound:'О'}
+        {upper:'Եվ',lower:'և',sound:'Ев'},
+        {upper:'Օ',lower:'օ',sound:'О'}, {upper:'Ֆ',lower:'ֆ',sound:'Ф'}
       ];
       async function load() { try { alphabet = await fetch('alphabet.json').then(r => { if (!r.ok) throw new Error(); return r.json(); }); } catch { alphabet = starterAlphabet; } renderCards(); }
       function renderCards() { $('cards').innerHTML = ''; alphabet.forEach((letter, i) => { const b = document.createElement('button'); b.className = 'letter-card' + (selected.has(i) ? ' selected' : ''); b.innerHTML = `<span class="glyph">${letter.upper} ${letter.lower}</span><span class="sound">${letter.sound}</span>`; b.setAttribute('aria-pressed', selected.has(i)); b.onclick = () => { selected.has(i) ? selected.delete(i) : selected.add(i); renderCards(); }; $('cards').append(b); }); updateStart(); }

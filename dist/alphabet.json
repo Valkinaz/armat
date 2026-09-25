@@ -11,10 +11,13 @@
   { "upper": "Ժ", "lower": "ժ", "sound": "Ж" },
   { "upper": "Ի", "lower": "ի", "sound": "И" },
   { "upper": "Լ", "lower": "լ", "sound": "Л" },
+  { "upper": "Խ", "lower": "խ", "sound": "Х" },
   { "upper": "Ծ", "lower": "ծ", "sound": "тц" },
   { "upper": "Կ", "lower": "կ", "sound": "К" },
   { "upper": "Հ", "lower": "հ", "sound": "h" },
   { "upper": "Ձ", "lower": "ձ", "sound": "дз" },
+  { "upper": "Ղ", "lower": "ղ", "sound": "Р (гх)" },
+  { "upper": "Ճ", "lower": "ճ", "sound": "тч" },
   { "upper": "Մ", "lower": "մ", "sound": "М" },
   { "upper": "Յ", "lower": "յ", "sound": "Й" },
   { "upper": "Ն", "lower": "ն", "sound": "Н" },
@@ -22,6 +25,7 @@
   { "upper": "Ո", "lower": "ո", "sound": "Во" },
   { "upper": "Չ", "lower": "չ", "sound": "Ч" },
   { "upper": "Պ", "lower": "պ", "sound": "П" },
+  { "upper": "Ջ", "lower": "ջ", "sound": "дж" },
   { "upper": "Ռ", "lower": "ռ", "sound": "Р" },
   { "upper": "Ս", "lower": "ս", "sound": "С" },
   { "upper": "Վ", "lower": "վ", "sound": "В" },
@@ -31,5 +35,7 @@
   { "upper": "Ու", "lower": "ու", "sound": "У" },
   { "upper": "Փ", "lower": "փ", "sound": "пh" },
   { "upper": "Ք", "lower": "ք", "sound": "кh" },
-  { "upper": "Օ", "lower": "օ", "sound": "О" }
+  { "upper": "Եվ", "lower": "և", "sound": "Ев" },
+  { "upper": "Օ", "lower": "օ", "sound": "О" },
+  { "upper": "Ֆ", "lower": "ֆ", "sound": "Ф" }
 ]
