@@ -15,6 +15,7 @@
       * { box-sizing:border-box; }
       body { margin:0; min-height:100vh; color:var(--ink); background:radial-gradient(circle at 90% 5%, #f8d882 0, transparent 25rem), var(--paper); font-family:Onest,Arial,sans-serif; }
       button { font:inherit; }
+      button:focus-visible { outline:3px solid var(--green); outline-offset:3px; }
       .shell { max-width:1100px; margin:0 auto; padding:32px 24px 48px; }
       .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:42px; }
       .brand { display:flex; align-items:center; gap:11px; font-weight:700; letter-spacing:.02em; }
@@ -76,6 +77,7 @@
       .block-list { display:grid; gap:17px; }
       .block { padding:26px; border:1px solid var(--line); border-radius:20px; background:var(--cream); }
       .block-top { display:flex; justify-content:space-between; align-items:start; gap:18px; }
+      .block-practice { display:flex; flex-wrap:wrap; gap:10px; flex-shrink:0; }
       .block-number { margin:0 0 6px; color:var(--green); font-size:.85rem; font-weight:700; }
       .block h3 { margin:0 0 10px; font-size:1.35rem; }
       .block-rule { margin:0 0 8px; font-weight:700; line-height:1.5; }
@@ -84,18 +86,40 @@
       .example { padding:12px 14px; border-radius:11px; background:#f3f5ee; }
       .example-pair { display:block; font:600 1.05rem/1.45 'Noto Serif Armenian',Georgia,serif; }
       .example-ru { display:block; margin-top:2px; color:var(--muted); font-size:.84rem; }
+      .sentence-examples { grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); }
+      .colloquial { display:block; margin:10px 0 0; color:var(--muted); font-size:.84rem; line-height:1.5; }
+      .armenian { font-family:'Noto Serif Armenian',Georgia,serif; }
+      .colloquial .armenian { display:block; font-size:1rem; color:var(--ink); }
+      .forms-wrap { overflow-x:auto; margin-bottom:20px; }
+      .forms-table { width:100%; border-collapse:collapse; text-align:left; line-height:1.5; }
+      .forms-table th, .forms-table td { padding:12px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+      .forms-table th { font-size:.88rem; font-weight:600; }
+      .forms-table td:first-child { white-space:nowrap; }
+      .forms-table .colloquial { margin-top:6px; }
       .lesson-actions { display:flex; justify-content:flex-end; margin:25px 0; }
       .grammar-training { max-width:660px; margin:0 auto; }
       .grammar-prompt { font:600 clamp(3.5rem,12vw,6.5rem)/1.15 'Noto Serif Armenian',Georgia,serif; }
       .grammar-prompt.long { font-size:clamp(2.25rem,9vw,4rem); }
+      .grammar-prompt.sentence { font-size:clamp(1.3rem,5vw,2rem); line-height:1.6; overflow-wrap:anywhere; }
       .grammar-translation { margin:8px 0 0; color:var(--muted); }
       .grammar-training .options { grid-template-columns:repeat(2,1fr); }
       .grammar-training .option { font:600 1.35rem 'Noto Serif Armenian',Georgia,serif; }
       .grammar-explanation { min-height:58px; margin:10px 0 0; color:var(--muted); line-height:1.5; }
       .grammar-training .feedback:empty, .grammar-explanation:empty { display:none; }
+      .grammar-answer { margin:14px 0 0; font:600 1.25rem/1.6 'Noto Serif Armenian',Georgia,serif; overflow-wrap:anywhere; }
+      .grammar-answer:empty, .colloquial:empty { display:none; }
+      .sentence-answer, .word-bank { display:flex; flex-wrap:wrap; justify-content:center; gap:9px; }
+      .sentence-answer { min-height:82px; padding:14px; margin:22px 0 16px; border:1.5px dashed #9eb2a6; border-radius:13px; background:var(--paper); }
+      .sentence-placeholder { align-self:center; color:var(--muted); font-size:.9rem; }
+      .word { min-height:44px; padding:8px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--cream); color:var(--ink); cursor:pointer; font:600 1.1rem/1.5 'Noto Serif Armenian',Georgia,serif; }
+      .word:hover:not(:disabled) { border-color:var(--green); }
+      .word:disabled { cursor:default; }
+      .word-bank .word:disabled { opacity:.4; }
+      .build-actions { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:22px; }
       .result-actions { display:flex; justify-content:center; flex-wrap:wrap; gap:11px; margin-top:23px; }
       .hidden { display:none !important; }
       @media (max-width:650px) { .shell{padding:22px 16px 35px}.topbar{align-items:flex-start;flex-direction:column;margin-bottom:31px}.nav{width:100%}.nav button{flex:1}.selection-bar{align-items:flex-start;flex-direction:column;gap:12px}.selection-actions{justify-content:space-between;width:100%}.cards{grid-template-columns:repeat(2,1fr);gap:10px}.letter-card{min-height:145px;padding:17px}.glyph{font-size:3.2rem}.start-row{justify-content:stretch}.primary{width:100%}.options{grid-template-columns:1fr}.grammar-training .options{grid-template-columns:1fr}.question-card{padding:31px 20px}.training{padding-top:7px}.block{padding:19px}.block-top{display:block}.block-top .secondary{margin:12px 0 0}.lesson-actions .primary{width:100%}.result-actions{flex-direction:column}.result-actions button{width:100%} }
+      @media (max-width:650px) { .block-practice{margin-bottom:18px}.block-practice .secondary{flex:1}.forms-table th,.forms-table td{padding:10px 5px;font-size:.85rem}.forms-table .example-pair{font-size:.95rem}.progress{gap:12px}.track{width:35%;flex-shrink:0} }
     </style>
   </head>
   <body>
@@ -116,8 +140,28 @@
       </section>
       <section class="completion" id="completion"><div class="medal">✦</div><h2>Тренировка завершена</h2><p id="result"></p><button class="primary" id="again">Выбрать буквы снова</button></section>
       <section class="hidden" id="grammar-home"><p class="eyebrow">Грамматика</p><h1>Уроки армянского языка</h1><p class="intro">Читай объяснение, смотри примеры и проверяй себя. Блоки урока можно проходить в любом порядке.</p><div class="lesson-list" id="lesson-list"></div></section>
-      <section class="hidden" id="lesson-detail"><button class="back" id="lesson-back" type="button">← К урокам</button><div class="lesson-header"><p class="eyebrow" id="lesson-label"></p><h1 id="lesson-title"></h1><p id="lesson-lead"></p></div><div class="block-list" id="block-list"></div><div class="lesson-actions"><button class="primary" id="mixed-start" type="button"></button></div></section>
-      <section class="grammar-training hidden" id="grammar-training"><button class="back" id="grammar-back" type="button">← К уроку</button><div class="progress"><span id="grammar-progress-label"></span><div class="track"><div class="fill" id="grammar-fill"></div></div></div><div class="question-card"><p class="eyebrow" id="grammar-mode"></p><p class="prompt">Выбери форму множественного числа</p><div class="grammar-prompt" id="grammar-singular"></div><p class="grammar-translation" id="grammar-translation"></p><div class="options" id="grammar-options"></div><p class="feedback" id="grammar-feedback" aria-live="polite"></p><p class="grammar-explanation" id="grammar-explanation"></p></div><div class="next-row"><button class="primary hidden" id="grammar-next" type="button">Следующее слово →</button></div></section>
+      <section class="hidden" id="lesson-detail"><button class="back" id="lesson-back" type="button">← К урокам</button><div class="lesson-header"><p class="eyebrow" id="lesson-label"></p><h1 id="lesson-title"></h1><p id="lesson-lead"></p><p class="hidden" id="lesson-intro"></p></div><div class="block-list" id="block-list"></div><div class="lesson-actions"><button class="primary" id="mixed-start" type="button"></button></div></section>
+      <section class="grammar-training hidden" id="grammar-training">
+        <button class="back" id="grammar-back" type="button">← К уроку</button>
+        <div class="progress"><span id="grammar-progress-label"></span><div class="track"><div class="fill" id="grammar-fill"></div></div></div>
+        <div class="question-card">
+          <p class="eyebrow" id="grammar-mode"></p><p class="prompt" id="grammar-instruction"></p>
+          <p class="hidden colloquial" id="grammar-variant">Разговорный вариант</p>
+          <div class="grammar-prompt" id="grammar-singular" lang="hy"></div>
+          <p class="grammar-translation" id="grammar-translation"></p>
+          <div class="options" id="grammar-options"></div>
+          <div class="hidden" id="grammar-build">
+            <div class="sentence-answer" id="sentence-answer" role="group" aria-label="Собранное предложение"></div>
+            <div class="word-bank" id="word-bank" role="group" aria-label="Слова для сборки"></div>
+            <div class="build-actions"><button class="secondary" id="build-reset" type="button">Сбросить</button><button class="primary" id="build-check" type="button" disabled>Проверить</button></div>
+          </div>
+          <p class="feedback" id="grammar-feedback" aria-live="polite"></p>
+          <p class="grammar-answer" id="grammar-answer" lang="hy"></p>
+          <p class="grammar-explanation" id="grammar-explanation"></p>
+          <p class="colloquial" id="grammar-colloquial"></p>
+        </div>
+        <div class="next-row"><button class="primary hidden" id="grammar-next" type="button">Следующее задание →</button></div>
+      </section>
       <section class="completion hidden" id="grammar-completion"><div class="medal">✦</div><h2>Практика завершена</h2><p id="grammar-result"></p><div class="result-actions"><button class="secondary hidden" id="retry-mistakes" type="button">Повторить ошибки</button><button class="primary" id="result-back" type="button">К уроку</button></div></section>
     </main>
     <script src="grammar-lessons.js"></script>
@@ -164,6 +208,7 @@
 
       const grammarLessons = window.grammarLessons || [];
       let activeLesson = null, grammarQueue = [], grammarCurrent = 0, grammarCorrect = 0, grammarAnswered = false, grammarMistakes = [];
+      let grammarWordOrder = [], grammarSelectedWords = [];
       function renderLessonList() {
         const list = $('lesson-list');
         list.replaceChildren();
@@ -177,12 +222,31 @@
           list.append(button);
         });
       }
+      function setColloquial(element, sentence) {
+        element.replaceChildren();
+        if (!sentence) return;
+        const label = document.createElement('span'); label.textContent = 'Разговорный вариант';
+        const text = document.createElement('span'); text.className = 'armenian'; text.lang = 'hy'; text.textContent = sentence;
+        element.append(label, text);
+      }
+      function appendExample(container, item) {
+        const text = document.createElement('span'); text.className = 'example-pair'; text.lang = 'hy';
+        text.textContent = item.sentence ?? `${item.singular} → ${item.plural}`;
+        const translation = document.createElement('span'); translation.className = 'example-ru'; translation.textContent = item.ru;
+        container.append(text, translation);
+        if (item.colloquial) {
+          const colloquial = document.createElement('span'); colloquial.className = 'colloquial';
+          setColloquial(colloquial, item.colloquial); container.append(colloquial);
+        }
+      }
       function openLesson(id) {
         const lessonIndex = grammarLessons.findIndex(lesson => lesson.id === id);
         if (lessonIndex < 0) return;
         activeLesson = grammarLessons[lessonIndex];
         $('lesson-label').textContent = `Грамматика · Урок ${lessonIndex + 1}`;
         $('lesson-title').textContent = activeLesson.title; $('lesson-lead').textContent = activeLesson.lead;
+        $('lesson-intro').textContent = activeLesson.intro || '';
+        $('lesson-intro').classList.toggle('hidden', !activeLesson.intro);
         $('mixed-start').textContent = `Смешанная тренировка · ${activeLesson.blocks.reduce((sum, block) => sum + Math.min(3, block.examples.length), 0)} вопросов`;
         const list = $('block-list'); list.replaceChildren();
         activeLesson.blocks.forEach((block, index) => {
@@ -191,30 +255,155 @@
           const heading = document.createElement('div');
           const number = document.createElement('p'); number.className = 'block-number'; number.textContent = `Блок ${index + 1} из ${activeLesson.blocks.length}`;
           const title = document.createElement('h3'); title.textContent = block.title; heading.append(number, title);
-          const practice = document.createElement('button'); practice.className = 'secondary'; practice.type = 'button'; practice.textContent = 'Практика · до 6 слов';
-          practice.onclick = () => startGrammarPractice(shuffled(block.examples).slice(0, 6), block.title);
-          top.append(heading, practice);
+          const actions = document.createElement('div'); actions.className = 'block-practice';
+          const modes = block.exercises ? [['choice', 'Выбрать форму'], ['build', 'Собрать предложение']] : [[null, 'Практика · до 6 слов']];
+          modes.forEach(([type, label]) => {
+            const practice = document.createElement('button'); practice.className = 'secondary'; practice.type = 'button'; practice.textContent = label;
+            practice.onclick = () => {
+              const items = block.exercises ? block.exercises.filter(item => item.type === type) : block.examples;
+              startGrammarPractice(shuffled(items).slice(0, 6), block.title);
+            };
+            actions.append(practice);
+          });
+          top.append(heading, actions);
           const rule = document.createElement('p'); rule.className = 'block-rule'; rule.textContent = block.rule;
           const detail = document.createElement('p'); detail.className = 'block-detail'; detail.textContent = block.detail;
-          const examples = document.createElement('ul'); examples.className = 'examples';
-          block.examples.forEach(item => {
+          section.append(top, rule, detail);
+          const forms = block.examples.filter(item => item.person);
+          if (forms.length) {
+            const wrap = document.createElement('div'); wrap.className = 'forms-wrap';
+            const table = document.createElement('table'); table.className = 'forms-table'; table.setAttribute('aria-label', `${block.title}: формы по лицам`);
+            const head = document.createElement('thead'); const header = document.createElement('tr');
+            ['Лицо', 'Форма', 'Пример'].forEach(label => { const cell = document.createElement('th'); cell.scope = 'col'; cell.textContent = label; header.append(cell); });
+            head.append(header); const body = document.createElement('tbody');
+            forms.forEach(item => {
+              const row = document.createElement('tr');
+              const person = document.createElement('td'); person.textContent = item.person;
+              const form = document.createElement('td'); form.className = 'armenian'; form.lang = 'hy'; form.textContent = item.form;
+              const example = document.createElement('td'); appendExample(example, item);
+              row.append(person, form, example); body.append(row);
+            });
+            table.append(head, body); wrap.append(table); section.append(wrap);
+          }
+          const examples = document.createElement('ul'); examples.className = 'examples' + (block.exercises ? ' sentence-examples' : '');
+          block.examples.filter(item => !item.person).forEach(item => {
             const card = document.createElement('li'); card.className = 'example';
-            const pair = document.createElement('span'); pair.className = 'example-pair'; pair.textContent = `${item.singular} → ${item.plural}`;
-            const translation = document.createElement('span'); translation.className = 'example-ru'; translation.textContent = item.ru;
-            card.append(pair, translation); examples.append(card);
+            appendExample(card, item); examples.append(card);
           });
-          section.append(top, rule, detail, examples); list.append(section);
+          section.append(examples); list.append(section);
         });
         showSection('lesson-detail');
       }
-      function startMixedPractice() { if (!activeLesson) return; const items = activeLesson.blocks.flatMap(block => shuffled(block.examples).slice(0, 3)); startGrammarPractice(shuffled(items), 'Смешанная тренировка'); }
+      function mixedBlockQuestions(block) {
+        if (!block.exercises) return shuffled(block.examples).slice(0, 3);
+        const picked = [];
+        for (const type of ['choice', 'build']) {
+          const item = shuffled(block.exercises.filter(exercise => exercise.type === type && !picked.some(other => other.exampleId === exercise.exampleId)))[0];
+          if (item) picked.push(item);
+        }
+        const remaining = shuffled(block.exercises.filter(item => !picked.some(other => other.exampleId === item.exampleId)));
+        for (const item of remaining) {
+          if (picked.length >= 3) break;
+          if (!picked.some(other => other.exampleId === item.exampleId)) picked.push(item);
+        }
+        return picked;
+      }
+      function startMixedPractice() { if (!activeLesson) return; startGrammarPractice(shuffled(activeLesson.blocks.flatMap(mixedBlockQuestions)), 'Смешанная тренировка'); }
       function startGrammarPractice(items, mode) { if (!items.length) return; grammarQueue = [...items]; grammarCurrent = 0; grammarCorrect = 0; grammarMistakes = []; $('grammar-mode').textContent = mode; showSection('grammar-training'); renderGrammarQuestion(); }
-      function renderGrammarQuestion() { grammarAnswered = false; const item = grammarQueue[grammarCurrent]; $('grammar-progress-label').textContent = `Слово ${grammarCurrent + 1} из ${grammarQueue.length}`; $('grammar-fill').style.width = `${grammarCurrent / grammarQueue.length * 100}%`; $('grammar-singular').textContent = item.singular; $('grammar-singular').classList.toggle('long', item.singular.length > 6); $('grammar-translation').textContent = item.ru; $('grammar-feedback').textContent = ''; $('grammar-feedback').className = 'feedback'; $('grammar-explanation').textContent = ''; $('grammar-next').classList.add('hidden'); const options = $('grammar-options'); options.replaceChildren(); shuffled([item.plural, item.wrong]).forEach(value => { const button = document.createElement('button'); button.className = 'option'; button.type = 'button'; button.textContent = value; button.onclick = () => answerGrammar(button, value, item); options.append(button); }); }
-      function answerGrammar(button, value, item) { if (grammarAnswered) return; grammarAnswered = true; const good = value === item.plural; if (good) grammarCorrect++; else grammarMistakes.push(item); $('grammar-options').querySelectorAll('.option').forEach(option => { option.disabled = true; if (option.textContent === item.plural) option.classList.add('correct'); }); if (!good) button.classList.add('wrong'); $('grammar-feedback').textContent = good ? 'Верно!' : `Правильно: ${item.plural}`; $('grammar-feedback').classList.add(good ? 'good' : 'bad'); $('grammar-explanation').textContent = item.note; $('grammar-next').textContent = grammarCurrent === grammarQueue.length - 1 ? 'Посмотреть результат' : 'Следующее слово →'; $('grammar-next').classList.remove('hidden'); }
-      function nextGrammar() { grammarCurrent++; if (grammarCurrent < grammarQueue.length) renderGrammarQuestion(); else finishGrammar(); }
+      function renderGrammarQuestion() {
+        grammarAnswered = false;
+        const item = grammarQueue[grammarCurrent], building = item.type === 'build';
+        $('grammar-progress-label').textContent = `${item.type ? 'Задание' : 'Слово'} ${grammarCurrent + 1} из ${grammarQueue.length}`;
+        $('grammar-fill').style.width = `${grammarCurrent / grammarQueue.length * 100}%`;
+        $('grammar-instruction').textContent = building ? 'Собери предложение по образцу урока' : item.type === 'choice' ? 'Выбери подходящую форму глагола' : 'Выбери форму множественного числа';
+        const prompt = item.prompt ?? item.singular ?? '';
+        $('grammar-singular').textContent = prompt;
+        $('grammar-singular').classList.toggle('long', !item.type && prompt.length > 6);
+        $('grammar-singular').classList.toggle('sentence', Boolean(item.type));
+        $('grammar-singular').classList.toggle('hidden', building);
+        $('grammar-variant').classList.toggle('hidden', item.variant !== 'colloquial');
+        $('grammar-translation').textContent = item.ru;
+        $('grammar-feedback').textContent = ''; $('grammar-feedback').className = 'feedback';
+        $('grammar-answer').textContent = ''; $('grammar-explanation').textContent = ''; $('grammar-colloquial').replaceChildren();
+        $('grammar-next').classList.add('hidden');
+        $('grammar-build').classList.toggle('hidden', !building);
+        const options = $('grammar-options'); options.replaceChildren(); options.classList.toggle('hidden', building);
+        if (building) {
+          grammarSelectedWords = [];
+          grammarWordOrder = shuffled(item.words.map((_, index) => index));
+          if (grammarWordOrder.every((index, position) => index === position)) grammarWordOrder.push(grammarWordOrder.shift());
+          renderBuildWords();
+        } else {
+          shuffled(item.options ?? [item.plural, item.wrong]).forEach(value => {
+            const button = document.createElement('button'); button.className = 'option'; button.type = 'button'; button.lang = 'hy'; button.textContent = value;
+            button.onclick = () => answerGrammar(button, value, item); options.append(button);
+          });
+        }
+      }
+      function renderBuildWords() {
+        const item = grammarQueue[grammarCurrent];
+        const answer = $('sentence-answer'), bank = $('word-bank'); answer.replaceChildren(); bank.replaceChildren();
+        if (!grammarSelectedWords.length) {
+          const placeholder = document.createElement('span'); placeholder.className = 'sentence-placeholder'; placeholder.textContent = 'Нажимай на слова ниже'; answer.append(placeholder);
+        }
+        grammarSelectedWords.forEach(index => {
+          const button = document.createElement('button'); button.className = 'word'; button.type = 'button'; button.lang = 'hy'; button.textContent = item.words[index];
+          button.setAttribute('aria-label', `Вернуть слово ${item.words[index]}`); button.disabled = grammarAnswered;
+          button.onclick = () => {
+            if (grammarAnswered) return;
+            grammarSelectedWords = grammarSelectedWords.filter(selected => selected !== index);
+            renderBuildWords(); $('word-bank').querySelector(`[data-word-index="${index}"]`).focus();
+          };
+          answer.append(button);
+        });
+        grammarWordOrder.forEach(index => {
+          const button = document.createElement('button'); button.className = 'word'; button.type = 'button'; button.lang = 'hy'; button.textContent = item.words[index];
+          button.dataset.wordIndex = index; button.setAttribute('aria-label', `Добавить слово ${item.words[index]}`);
+          button.disabled = grammarAnswered || grammarSelectedWords.includes(index);
+          button.onclick = () => {
+            if (grammarAnswered || grammarSelectedWords.includes(index)) return;
+            grammarSelectedWords.push(index); renderBuildWords();
+            ($('word-bank').querySelector('button:not(:disabled)') || $('build-check')).focus();
+          };
+          bank.append(button);
+        });
+        $('build-check').disabled = grammarAnswered || grammarSelectedWords.length !== item.words.length;
+        $('build-reset').disabled = grammarAnswered || !grammarSelectedWords.length;
+      }
+      function answerGrammar(button, value, item) {
+        if (grammarAnswered) return;
+        const answers = item.answers ?? [item.plural], good = answers.includes(value);
+        $('grammar-options').querySelectorAll('.option').forEach(option => { option.disabled = true; if (answers.includes(option.textContent)) option.classList.add('correct'); });
+        if (!good) button.classList.add('wrong');
+        const sentence = item.type === 'choice' && good ? item.prompt.replace('___', value) : item.sentence;
+        finishGrammarAnswer(item, good, sentence);
+      }
+      function checkBuildAnswer() {
+        const item = grammarQueue[grammarCurrent];
+        if (grammarAnswered || item.type !== 'build' || grammarSelectedWords.length !== item.words.length) return;
+        const sentence = grammarSelectedWords.map(index => item.words[index]).join(' ');
+        finishGrammarAnswer(item, sentence === item.sentence, item.sentence);
+        renderBuildWords();
+      }
+      function finishGrammarAnswer(item, good, sentence) {
+        if (grammarAnswered) return;
+        grammarAnswered = true;
+        if (good) grammarCorrect++; else grammarMistakes.push(item);
+        $('grammar-fill').style.width = `${(grammarCurrent + 1) / grammarQueue.length * 100}%`;
+        $('grammar-feedback').textContent = good ? 'Верно!' : item.type === 'build' ? 'Порядок слов отличается от образца' : item.type ? 'Правильный образец:' : `Правильно: ${item.plural}`;
+        $('grammar-feedback').classList.add(good ? 'good' : 'bad');
+        $('grammar-answer').textContent = sentence || '';
+        $('grammar-explanation').textContent = item.note;
+        setColloquial($('grammar-colloquial'), item.colloquial);
+        $('grammar-next').textContent = grammarCurrent === grammarQueue.length - 1 ? 'Посмотреть результат' : item.type ? 'Следующее задание →' : 'Следующее слово →';
+        $('grammar-next').classList.remove('hidden'); $('grammar-next').focus();
+      }
+      function nextGrammar() { if (!grammarAnswered || grammarCurrent >= grammarQueue.length) return; grammarCurrent++; if (grammarCurrent < grammarQueue.length) { renderGrammarQuestion(); ($('grammar-options').querySelector('button') || $('word-bank').querySelector('button')).focus(); } else finishGrammar(); }
       function finishGrammar() { $('grammar-result').textContent = `Правильных ответов: ${grammarCorrect} из ${grammarQueue.length}.`; $('retry-mistakes').classList.toggle('hidden', grammarMistakes.length === 0); showSection('grammar-completion'); }
       $('start').onclick = startTraining; $('select-all').onclick = toggleAll; $('next').onclick = next; $('back').onclick = () => showSection('home'); $('again').onclick = () => showSection('home');
       $('tab-letters').onclick = () => showSection('home'); $('tab-grammar').onclick = () => showSection('grammar-home'); $('lesson-back').onclick = () => showSection('grammar-home'); $('grammar-back').onclick = () => showSection('lesson-detail'); $('result-back').onclick = () => showSection('lesson-detail'); $('mixed-start').onclick = startMixedPractice; $('grammar-next').onclick = nextGrammar; $('retry-mistakes').onclick = () => startGrammarPractice(shuffled(grammarMistakes), 'Повторение ошибок');
+      $('build-check').onclick = checkBuildAnswer;
+      $('build-reset').onclick = () => { if (grammarAnswered) return; grammarSelectedWords = []; renderBuildWords(); $('word-bank').querySelector('button').focus(); };
       renderLessonList();
       load();
     </script>

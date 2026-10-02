@@ -85,3 +85,108 @@ window.grammarLessons = [
     ]
   }
 ];
+
+// Предложения хранятся один раз; задания с пропуском и сборкой используют
+// те же примеры, переводы и объяснения.
+(() => {
+  const lesson = {
+    id: 'present-auxiliary',
+    title: 'Вспомогательный глагол в настоящем времени',
+    lead: 'Учимся говорить о себе и других, отрицать и задавать простые вопросы.',
+    intro: 'Быть — լինել. В армянском языке не бывает предложения без глагола. Именное предложение составляется с вспомогательным глаголом.',
+    blocks: [
+      {
+        id: 'affirmative',
+        title: 'Утверждение',
+        rule: 'Выбирай форму вспомогательного глагола по лицу: եմ, ես, է, ենք, եք, են.',
+        detail: 'В таблице: հայ — армянин, հայեր — армяне. Слово ես встречается в двух ролях: Ես երաժիշտ եմ։ — «Я музыкант»; Դու ճիշտ ես։ — «Ты прав». Разговорные альтернативы: է → ա, նա → ինքը, նրանք → իրանք.',
+        examples: [
+          { id: 'armenian-i', person: 'ես — я', form: 'եմ', sentence: 'Ես հայ եմ։', ru: 'Я армянин.', note: 'Для ես выбираем եմ.' },
+          { id: 'armenian-you', person: 'դու — ты', form: 'ես', sentence: 'Դու հայ ես։', ru: 'Ты армянин.', note: 'Для դու выбираем ես. Здесь ես — форма глагола.' },
+          { id: 'armenian-he', person: 'նա — он, она', form: 'է', sentence: 'Նա հայ է։', colloquial: 'Ինքը հայ ա։', ru: 'Он армянин.', note: 'Для նա выбираем է; разговорная альтернатива — ա.' },
+          { id: 'armenian-we', person: 'մենք — мы', form: 'ենք', sentence: 'Մենք հայեր ենք։', ru: 'Мы армяне.', note: 'Для մենք выбираем ենք; հայեր — армяне.' },
+          { id: 'armenian-you-plural', person: 'դուք — вы', form: 'եք', sentence: 'Դուք հայեր եք։', ru: 'Вы армяне.', note: 'Для դուք выбираем եք.' },
+          { id: 'armenian-they', person: 'նրանք — они', form: 'են', sentence: 'Նրանք հայեր են։', colloquial: 'Իրանք հայեր են։', ru: 'Они армяне.', note: 'Для նրանք выбираем են. Разговорная альтернатива նրանք — իրանք.' },
+          { id: 'musician', form: 'եմ', sentence: 'Ես երաժիշտ եմ։', ru: 'Я музыкант.', note: 'Для ես выбираем եմ; երաժիշտ — музыкант.' },
+          { id: 'policeman', form: 'է', sentence: 'Նա ոստիկան է։', colloquial: 'Ինքը ոստիկան ա։', ru: 'Он полицейский.', note: 'Для նա выбираем է; ոստիկան — полицейский.' },
+          { id: 'students', form: 'ենք', sentence: 'Մենք ուսանողներ ենք։', ru: 'Мы студенты.', note: 'Для մենք выбираем ենք; ուսանող → ուսանողներ — студент → студенты.' },
+          { id: 'hungry', form: 'եմ', sentence: 'Ես սոված եմ։', ru: 'Я голоден.', note: 'Для ես выбираем եմ; սոված — голодный.' },
+          { id: 'good-person', form: 'է', sentence: 'Նա լավ մարդ է։', colloquial: 'Ինքը լավ մարդ ա։', ru: 'Он хороший человек.', note: 'Для նա выбираем է; լավ մարդ — хороший человек.' },
+          { id: 'good-people', form: 'են', sentence: 'Նրանք լավ մարդիկ են։', colloquial: 'Իրանք լավ մարդիկ են։', ru: 'Они хорошие люди.', note: 'Для նրանք выбираем են. Вспомни: մարդ → մարդիկ — человек → люди.' },
+          { id: 'dark', form: 'է', sentence: 'Արդեն մութ է։', colloquial: 'Արդեն մութ ա։', ru: 'Уже темно.', note: 'В этом образце используется է; արդեն — уже, մութ — темно.' },
+          { id: 'sunday', form: 'է', sentence: 'Այսօր կիրակի է։', colloquial: 'Այսօր կիրակի ա։', ru: 'Сегодня воскресенье.', note: 'В этом образце используется է; այսօր — сегодня, կիրակի — воскресенье.' },
+          { id: 'right-you', form: 'ես', sentence: 'Դու ճիշտ ես։', ru: 'Ты прав.', note: 'Для դու выбираем ես; ճիշտ — прав.' },
+          { id: 'right-we', form: 'ենք', sentence: 'Մենք ճիշտ ենք։', ru: 'Мы правы.', note: 'Для մենք выбираем ենք; ճիշտ — правы в этом предложении.' }
+        ]
+      },
+      {
+        id: 'negative',
+        title: 'Отрицание',
+        rule: 'Для отрицания выбирай форму по лицу: չեմ, չես, չէ, չենք, չեք, չեն.',
+        detail: 'В таблице: ռուս — русский, ռուսներ — русские. Для третьего лица единственного числа в уроке даны չէ и разговорное չի. Разговорные варианты местоимений: նա → ինքը, նրանք → իրանք.',
+        examples: [
+          { id: 'not-russian-i', person: 'ես — я', form: 'չեմ', sentence: 'Ես ռուս չեմ։', ru: 'Я не русский.', note: 'Отрицательная форма для ես — չեմ.' },
+          { id: 'not-russian-you', person: 'դու — ты', form: 'չես', sentence: 'Դու ռուս չես։', ru: 'Ты не русский.', note: 'Отрицательная форма для դու — չես.' },
+          { id: 'not-russian-he', person: 'նա — он, она', form: 'չէ', sentence: 'Նա ռուս չէ։', colloquial: 'Ինքը ռուս չի։', ru: 'Он не русский.', note: 'Для նա используем չէ; разговорная альтернатива — չի.' },
+          { id: 'not-russian-we', person: 'մենք — мы', form: 'չենք', sentence: 'Մենք ռուսներ չենք։', ru: 'Мы не русские.', note: 'Отрицательная форма для մենք — չենք.' },
+          { id: 'not-russian-you-plural', person: 'դուք — вы', form: 'չեք', sentence: 'Դուք ռուսներ չեք։', ru: 'Вы не русские.', note: 'Отрицательная форма для դուք — չեք.' },
+          { id: 'not-russian-they', person: 'նրանք — они', form: 'չեն', sentence: 'Նրանք ռուսներ չեն։', colloquial: 'Իրանք ռուսներ չեն։', ru: 'Они не русские.', note: 'Отрицательная форма для նրանք — չեն; ռուսներ — русские.' },
+          { id: 'not-doctor', form: 'չեմ', sentence: 'Ես բժիշկ չեմ։', ru: 'Я не врач.', note: 'Для ես выбираем չեմ; բժիշկ — врач.' },
+          { id: 'not-tired', form: 'չեմ', sentence: 'Ես հոգնած չեմ։', ru: 'Я не уставший.', note: 'Для ես выбираем չեմ; հոգնած — уставший.' },
+          { id: 'not-ill', form: 'չեմ', sentence: 'Ես հիվանդ չեմ։', ru: 'Я не больна.', note: 'Для ես выбираем չեմ; հիվանդ — больна в этом предложении.' }
+        ]
+      },
+      {
+        id: 'this-is',
+        title: 'Это…',
+        rule: 'Используй образец «Это школа»: Սա դպրոց է։',
+        detail: 'Разговорный вариант из урока: Էս դպրոց ա։ Подставляй другие слова в тот же образец. Для отрицания используй չէ, разговорная альтернатива — չի.',
+        examples: [
+          { id: 'school', form: 'է', sentence: 'Սա դպրոց է։', colloquial: 'Էս դպրոց ա։', ru: 'Это школа.', note: 'Образец: Սա + слово + է. Դպրոց — школа.' },
+          { id: 'pen', form: 'է', sentence: 'Սա գրիչ է։', colloquial: 'Էս գրիչ ա։', ru: 'Это ручка.', note: 'Подставляем գրիչ — ручка — в образец Սա … է։' },
+          { id: 'book', form: 'է', sentence: 'Սա գիրք է։', colloquial: 'Էս գիրք ա։', ru: 'Это книга.', note: 'Подставляем գիրք — книга — в образец Սա … է։' },
+          { id: 'pencil', form: 'է', sentence: 'Սա մատիտ է։', colloquial: 'Էս մատիտ ա։', ru: 'Это карандаш.', note: 'Подставляем մատիտ — карандаш — в образец Սա … է։' },
+          { id: 'house', form: 'է', sentence: 'Սա տուն է։', colloquial: 'Էս տուն ա։', ru: 'Это дом.', note: 'Подставляем տուն — дом — в образец Սա … է։' },
+          { id: 'water', form: 'է', sentence: 'Սա ջուր է։', colloquial: 'Էս ջուր ա։', ru: 'Это вода.', note: 'Подставляем ջուր — вода — в образец Սա … է։' },
+          { id: 'not-water', form: 'չէ', sentence: 'Ոչ, սա ջուր չէ։', colloquial: 'Ոչ, էս ջուր չի։', ru: 'Нет, это не вода.', note: 'Ոչ — нет. В отрицательном предложении используем չէ; разговорная альтернатива — չի.' }
+        ]
+      },
+      {
+        id: 'questions',
+        title: 'Вопросы',
+        rule: 'Запомни образцы «Кто ты?», «Кто Вы?», «Что это?» и «Кто он?».',
+        detail: 'Сначала сопоставь вопросы с переводом. Затем выбери форму глагола или собери вопрос по образцу. Армянские знаки вопроса уже расставлены в словах.',
+        examples: [
+          { id: 'who-you', form: 'ես', verbIndex: 1, sentence: 'Ո՞վ ես դու։', ru: 'Кто ты?', note: 'В вопросе с դու используется ես. Ո՞վ — кто?' },
+          { id: 'who-you-polite', form: 'եք', verbIndex: 1, sentence: 'Ո՞վ եք Դուք։', ru: 'Кто Вы?', note: 'В вопросе с Դուք используется եք.' },
+          { id: 'what-this', form: 'է', verbIndex: 1, sentence: 'Ի՞նչ է սա։', ru: 'Что это?', note: 'Образец из урока: Ի՞նչ է սա։ Ի՞նչ — что?' },
+          { id: 'who-he', form: 'է', verbIndex: 1, sentence: 'Ո՞վ է նա։', ru: 'Кто он?', note: 'В вопросе с նա используется է; разговорная альтернатива — ա.' },
+          { id: 'tired-question', form: 'ես', sentence: 'Դու հոգնա՞ծ ես։', ru: 'Ты уставший?', note: 'Для դու выбираем ես. Знак вопроса в этом образце уже стоит в слове հոգնա՞ծ.' }
+        ]
+      }
+    ]
+  };
+
+  for (const block of lesson.blocks) {
+    block.exercises = block.examples.flatMap(example => {
+      const words = example.sentence.split(' ');
+      const verbIndex = example.verbIndex ?? words.length - 1;
+      const promptWords = [...words];
+      promptWords[verbIndex] = promptWords[verbIndex].replace(example.form, '___');
+      const answers = example.form === 'է' ? ['է', 'ա'] : example.form === 'չէ' ? ['չէ', 'չի'] : [example.form];
+      const forms = example.form.startsWith('չ') ? ['չեմ', 'չես', 'չէ', 'չենք', 'չեք', 'չեն'] : ['եմ', 'ես', 'է', 'ենք', 'եք', 'են'];
+      const position = forms.indexOf(example.form);
+      const distractors = [...forms.slice(position + 1), ...forms.slice(0, position)].filter(form => !answers.includes(form));
+      const shared = { exampleId: example.id, sentence: example.sentence, ru: example.ru, note: example.note, colloquial: example.colloquial };
+      const exercises = [
+        { ...shared, id: `${example.id}-choice`, type: 'choice', prompt: promptWords.join(' '), answers, options: [...answers, ...distractors.slice(0, 4 - answers.length)] },
+        { ...shared, id: `${example.id}-build`, type: 'build', words }
+      ];
+      if (example.colloquial) {
+        exercises.push({ ...shared, id: `${example.id}-build-colloquial`, type: 'build', variant: 'colloquial', sentence: example.colloquial, words: example.colloquial.split(' ') });
+      }
+      return exercises;
+    });
+  }
+  window.grammarLessons.push(lesson);
+})();
