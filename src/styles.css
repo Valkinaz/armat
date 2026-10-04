@@ -1,0 +1,775 @@
+@font-face {
+  font-family: Onest;
+  src: url('/fonts/Onest-wght.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Serif Armenian';
+  src: url('/fonts/NotoSerifArmenian-wdth-wght.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+}
+
+:root {
+  --ink: #123836;
+  --muted: #607673;
+  --paper: #f8f5ed;
+  --cream: #fffdf8;
+  --sun: #f7c75c;
+  --sun-dark: #e8af36;
+  --line: #dfe4d8;
+  --green: #267555;
+  --red: #c75046;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background: radial-gradient(circle at 90% 5%, #f8d882 0, transparent 25rem), var(--paper);
+  font-family: Onest, Arial, sans-serif;
+}
+button {
+  font: inherit;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 3px;
+}
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 42px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--sun);
+  font:
+    700 24px 'Noto Serif Armenian',
+    serif;
+}
+.nav {
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--cream);
+}
+.nav a {
+  border: 0;
+  border-radius: 9px;
+  padding: 9px 13px;
+  cursor: pointer;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 600;
+}
+.nav a[aria-current='page'] {
+  color: var(--ink);
+  background: var(--sun);
+}
+h1 {
+  max-width: 720px;
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.65rem);
+  line-height: 1.08;
+  letter-spacing: -0.055em;
+}
+.intro {
+  max-width: 600px;
+  margin: 16px 0 34px;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+.selection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 17px;
+}
+.selection-bar h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.selection-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.counter {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.secondary {
+  cursor: pointer;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  padding: 9px 13px;
+  color: var(--ink);
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition:
+    background 0.13s,
+    color 0.13s,
+    opacity 0.13s;
+}
+.secondary:hover:not(:disabled) {
+  color: var(--cream);
+  background: var(--ink);
+}
+.secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 13px;
+}
+.letter-card {
+  min-height: 170px;
+  padding: 20px;
+  cursor: pointer;
+  text-align: left;
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  color: var(--ink);
+  background: var(--cream);
+  transition:
+    transform 0.16s,
+    border-color 0.16s,
+    background 0.16s,
+    box-shadow 0.16s;
+}
+.letter-card:hover {
+  transform: translateY(-3px);
+  border-color: #b9c9bc;
+  box-shadow: 0 9px 22px #173d3820;
+}
+.letter-card.selected {
+  border-color: var(--ink);
+  background: #e7f0e6;
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+.glyph {
+  display: block;
+  font:
+    600 clamp(2.65rem, 5.5vw, 4.2rem)/0.98 'Noto Serif Armenian',
+    Georgia,
+    serif;
+  letter-spacing: 0.03em;
+}
+.sound {
+  display: block;
+  margin-top: 19px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.letter-card.selected .sound {
+  color: var(--ink);
+}
+.start-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 27px;
+}
+.primary {
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 21px;
+  cursor: pointer;
+  color: #16342f;
+  background: var(--sun);
+  font-weight: 700;
+  box-shadow: 0 4px 0 var(--sun-dark);
+  transition:
+    transform 0.13s,
+    box-shadow 0.13s,
+    opacity 0.13s;
+}
+.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--sun-dark);
+}
+.primary:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--sun-dark);
+}
+.primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+  box-shadow: none;
+}
+.training {
+  display: none;
+  max-width: 660px;
+  margin: 0 auto;
+}
+.training.active,
+.completion.active {
+  display: block;
+}
+.progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 31px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.track {
+  overflow: hidden;
+  width: 170px;
+  height: 7px;
+  border-radius: 10px;
+  background: #dce3d8;
+}
+.fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--sun);
+  transition: width 0.25s;
+}
+.question-card {
+  padding: clamp(26px, 7vw, 54px);
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 25px;
+  background: var(--cream);
+  box-shadow: 0 16px 45px #25433b12;
+}
+.prompt {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.training-glyph {
+  font:
+    600 clamp(5rem, 15vw, 8.5rem)/1 'Noto Serif Armenian',
+    Georgia,
+    serif;
+}
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 27px;
+}
+.option {
+  min-height: 62px;
+  cursor: pointer;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  background: #fffefa;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition:
+    background 0.15s,
+    border 0.15s,
+    transform 0.15s;
+}
+.option:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: #9eb2a6;
+}
+.option:disabled {
+  cursor: default;
+}
+.option.correct {
+  border-color: var(--green);
+  background: #dff2e6;
+  color: #175438;
+}
+.option.wrong {
+  border-color: var(--red);
+  background: #f9e2dd;
+  color: #983d36;
+}
+.feedback {
+  min-height: 29px;
+  margin: 18px 0 0;
+  font-size: 0.97rem;
+  font-weight: 600;
+}
+.feedback.good {
+  color: var(--green);
+}
+.feedback.bad {
+  color: var(--red);
+}
+.next-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 26px;
+}
+.completion {
+  display: none;
+  max-width: 620px;
+  margin: 75px auto;
+  padding: 45px 32px;
+  text-align: center;
+  border-radius: 24px;
+  background: var(--cream);
+  border: 1px solid var(--line);
+}
+.completion .medal {
+  font-size: 3rem;
+}
+.completion h2 {
+  margin: 13px 0 8px;
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+}
+.completion p {
+  color: var(--muted);
+}
+.back {
+  cursor: pointer;
+  border: 0;
+  padding: 6px 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 0.9rem;
+}
+.back:hover {
+  color: var(--ink);
+}
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--green);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lesson-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 28px;
+}
+.lesson-tile {
+  padding: 25px;
+  text-align: left;
+  cursor: pointer;
+  border: 1.5px solid var(--line);
+  border-radius: 19px;
+  color: var(--ink);
+  background: var(--cream);
+}
+.lesson-tile:hover {
+  border-color: var(--green);
+  box-shadow: 0 9px 22px #173d3820;
+}
+.lesson-tile h2 {
+  margin: 0 0 10px;
+  font-size: 1.3rem;
+}
+.lesson-tile p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.lesson-tile .eyebrow {
+  margin-bottom: 10px;
+  color: var(--green);
+}
+.lesson-header {
+  max-width: 760px;
+  margin: 22px 0 30px;
+}
+.lesson-header p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+.block-list {
+  display: grid;
+  gap: 17px;
+}
+.block {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--cream);
+}
+.block-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 18px;
+}
+.block-practice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.block-number {
+  margin: 0 0 6px;
+  color: var(--green);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.block h3 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+}
+.block-rule {
+  margin: 0 0 8px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.block-detail {
+  max-width: 780px;
+  margin: 0 0 20px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.examples {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 9px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+.example {
+  padding: 12px 14px;
+  border-radius: 11px;
+  background: #f3f5ee;
+}
+.example-pair {
+  display: block;
+  font:
+    600 1.05rem/1.45 'Noto Serif Armenian',
+    Georgia,
+    serif;
+}
+.example-ru {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+.sentence-examples {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+.colloquial {
+  display: block;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+.armenian {
+  font-family: 'Noto Serif Armenian', Georgia, serif;
+}
+.colloquial .armenian {
+  display: block;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.forms-wrap {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+.forms-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  line-height: 1.5;
+}
+.forms-table th,
+.forms-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.forms-table th {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.forms-table td:first-child {
+  white-space: nowrap;
+}
+.forms-table .colloquial {
+  margin-top: 6px;
+}
+.lesson-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 25px 0;
+}
+.grammar-training {
+  max-width: 660px;
+  margin: 0 auto;
+}
+.grammar-prompt {
+  font:
+    600 clamp(3.5rem, 12vw, 6.5rem)/1.15 'Noto Serif Armenian',
+    Georgia,
+    serif;
+}
+.grammar-prompt.long {
+  font-size: clamp(2.25rem, 9vw, 4rem);
+}
+.grammar-prompt.sentence {
+  font-size: clamp(1.3rem, 5vw, 2rem);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.grammar-translation {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+.grammar-training .options {
+  grid-template-columns: repeat(2, 1fr);
+}
+.grammar-training .option {
+  font:
+    600 1.35rem 'Noto Serif Armenian',
+    Georgia,
+    serif;
+}
+.grammar-explanation {
+  min-height: 58px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.grammar-training .feedback:empty,
+.grammar-explanation:empty {
+  display: none;
+}
+.grammar-answer {
+  margin: 14px 0 0;
+  font:
+    600 1.25rem/1.6 'Noto Serif Armenian',
+    Georgia,
+    serif;
+  overflow-wrap: anywhere;
+}
+.grammar-answer:empty,
+.colloquial:empty {
+  display: none;
+}
+.sentence-answer,
+.word-bank {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+}
+.sentence-answer {
+  min-height: 82px;
+  padding: 14px;
+  margin: 22px 0 16px;
+  border: 1.5px dashed #9eb2a6;
+  border-radius: 13px;
+  background: var(--paper);
+}
+.sentence-placeholder {
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.word {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--cream);
+  color: var(--ink);
+  cursor: pointer;
+  font:
+    600 1.1rem/1.5 'Noto Serif Armenian',
+    Georgia,
+    serif;
+}
+.word:hover:not(:disabled) {
+  border-color: var(--green);
+}
+.word:disabled {
+  cursor: default;
+}
+.word-bank .word:disabled {
+  opacity: 0.4;
+}
+.build-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 22px;
+}
+.result-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 11px;
+  margin-top: 23px;
+}
+.hidden {
+  display: none !important;
+}
+@media (max-width: 650px) {
+  .shell {
+    padding: 22px 16px 35px;
+  }
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 31px;
+  }
+  .nav {
+    width: 100%;
+  }
+  .nav a {
+    flex: 1;
+  }
+  .selection-bar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .selection-actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .letter-card {
+    min-height: 145px;
+    padding: 17px;
+  }
+  .glyph {
+    font-size: 3.2rem;
+  }
+  .start-row {
+    justify-content: stretch;
+  }
+  .primary {
+    width: 100%;
+  }
+  .options {
+    grid-template-columns: 1fr;
+  }
+  .grammar-training .options {
+    grid-template-columns: 1fr;
+  }
+  .question-card {
+    padding: 31px 20px;
+  }
+  .training {
+    padding-top: 7px;
+  }
+  .block {
+    padding: 19px;
+  }
+  .block-top {
+    display: block;
+  }
+  .block-top .secondary {
+    margin: 12px 0 0;
+  }
+  .lesson-actions .primary {
+    width: 100%;
+  }
+  .result-actions {
+    flex-direction: column;
+  }
+  .result-actions button {
+    width: 100%;
+  }
+}
+@media (max-width: 650px) {
+  .block-practice {
+    margin-bottom: 18px;
+  }
+  .block-practice .secondary {
+    flex: 1;
+  }
+  .forms-table th,
+  .forms-table td {
+    padding: 10px 5px;
+    font-size: 0.85rem;
+  }
+  .forms-table .example-pair {
+    font-size: 0.95rem;
+  }
+  .progress {
+    gap: 12px;
+  }
+  .track {
+    width: 35%;
+    flex-shrink: 0;
+  }
+}
+
+.nav a,
+.lesson-tile,
+.back,
+.block h3 a {
+  text-decoration: none;
+}
+.nav a {
+  text-align: center;
+}
+.block h3 a {
+  color: inherit;
+}
+.block h3 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.back {
+  display: inline-block;
+}
+.primary:is(a) {
+  display: inline-block;
+  text-decoration: none;
+}
+[data-material-heading]:focus,
+.block h3:focus,
+.completion h2:focus,
+.training:focus,
+.grammar-training:focus {
+  outline: none;
+}
+@media (max-width: 650px) {
+  .result-actions a {
+    width: 100%;
+  }
+}

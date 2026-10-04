@@ -3,3 +3,7 @@
 Thumbs.db
 __pycache__/
 .sites-runtime/
+node_modules/
+dist/
+test-results/
+playwright-report/

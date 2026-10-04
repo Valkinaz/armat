@@ -1,0 +1,48 @@
+name: Проверки и сборка
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v7
+      - name: Настроить Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Установить зависимости
+        run: npm ci
+      - name: Проверить типы
+        run: npm run typecheck
+      - name: Проверить учебные данные
+        run: node scripts/check-data.mjs
+      - name: Проверить логику тренировок
+        run: npm test
+      - name: Собрать приложение
+        run: npm run build
+      - name: Установить браузер
+        run: npx playwright install --with-deps chromium
+      - name: Проверить приложение в браузере
+        run: npm run test:e2e
+      - name: Сохранить сборку
+        uses: actions/upload-artifact@v7
+        with:
+          name: armat-dist
+          path: dist
+          if-no-files-found: error
+      - name: Сохранить диагностику браузерных тестов
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-test-results
+          path: test-results
+          if-no-files-found: ignore
