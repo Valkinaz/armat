@@ -1,26 +1,29 @@
 import { Link } from 'react-router';
 import type { Ref } from 'react';
+import type { Session } from '../training/model.ts';
 
 export function Result({
-  alphabet,
+  kind,
   correct,
   total,
   originPath,
   onRetry,
+  onRestart,
   headingRef,
 }: {
-  alphabet: boolean;
+  kind: Session['kind'];
   correct: number;
   total: number;
   originPath: string;
   onRetry?: () => void;
+  onRestart?: () => void;
   headingRef: Ref<HTMLHeadingElement>;
 }) {
   return (
     <section className="completion active">
       <div className="medal">✦</div>
       <h2 ref={headingRef} tabIndex={-1}>
-        {alphabet ? 'Тренировка завершена' : 'Практика завершена'}
+        {kind === 'grammar' ? 'Практика завершена' : 'Тренировка завершена'}
       </h2>
       <p>
         Правильных ответов: {correct} из {total}.
@@ -31,8 +34,11 @@ export function Result({
             Повторить ошибки
           </button>
         )}
+        {onRestart && (
+          <button className="secondary" onClick={onRestart}>Пройти ещё раз</button>
+        )}
         <Link className="primary" to={originPath} state={null}>
-          {alphabet ? 'Выбрать буквы снова' : 'К уроку'}
+          {kind === 'alphabet' ? 'Выбрать буквы снова' : kind === 'vocabulary' ? 'К выбору наборов' : 'К уроку'}
         </Link>
       </div>
     </section>

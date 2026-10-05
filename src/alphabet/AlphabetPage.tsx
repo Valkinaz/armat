@@ -3,6 +3,7 @@ import { useAppState } from '../app/AppState.tsx';
 import { MaterialView } from '../app/MaterialView.tsx';
 import { useStartPractice } from '../app/useStartPractice.ts';
 import { alphabetQuestions } from '../training/model.ts';
+import { TeacherAcknowledgment } from '../shared/TeacherAcknowledgment.tsx';
 
 export function AlphabetPage() {
   const { selected, setSelected } = useAppState();
@@ -71,6 +72,7 @@ export function AlphabetPage() {
           </button>
         </div>
       </section>
+      <TeacherAcknowledgment />
     </MaterialView>
   );
 }

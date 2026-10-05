@@ -5,6 +5,7 @@ import { MaterialView, NotFound } from '../app/MaterialView.tsx';
 import { useStartPractice } from '../app/useStartPractice.ts';
 import { blockItems, grammarQuestions, mixedBlockItems, shuffled } from '../training/model.ts';
 import { Colloquial } from '../shared/Colloquial.tsx';
+import { TeacherAcknowledgment } from '../shared/TeacherAcknowledgment.tsx';
 
 export function GrammarPage() {
   return (
@@ -28,6 +29,7 @@ export function GrammarPage() {
           ))}
         </div>
       </section>
+      <TeacherAcknowledgment />
     </MaterialView>
   );
 }
@@ -184,6 +186,7 @@ export function LessonPage() {
           </button>
         </div>
       </section>
+      <TeacherAcknowledgment />
     </MaterialView>
   );
 }

@@ -113,6 +113,30 @@ h1 {
   font-size: 1.05rem;
   line-height: 1.55;
 }
+.teacher-acknowledgment {
+  margin-top: 40px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--cream);
+}
+.teacher-acknowledgment h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+.teacher-acknowledgment p {
+  max-width: 75ch;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.teacher-acknowledgment a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .selection-bar {
   display: flex;
   align-items: center;
@@ -647,9 +671,182 @@ h1 {
 .hidden {
   display: none !important;
 }
+.vocabulary-sets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+.vocabulary-set {
+  min-width: 0;
+  overflow: hidden;
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  background: var(--cream);
+}
+.vocabulary-set.selected {
+  border-color: var(--ink);
+  background: #e7f0e6;
+}
+.vocabulary-select {
+  position: relative;
+  width: 100%;
+  padding: 24px 60px 24px 24px;
+  text-align: left;
+  cursor: pointer;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+}
+.vocabulary-select:hover {
+  background: #173d3809;
+}
+.vocabulary-select:focus-visible {
+  outline-offset: -5px;
+}
+.vocabulary-set-title {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.vocabulary-set-count {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.vocabulary-check {
+  position: absolute;
+  top: 28px;
+  right: 24px;
+  font-size: 1.3rem;
+}
+.vocabulary-set details {
+  padding: 0 24px 20px;
+}
+.vocabulary-set summary {
+  width: fit-content;
+  padding: 5px 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.vocabulary-set summary:focus-visible,
+.vocabulary-switch input:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 3px;
+}
+.vocabulary-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  text-align: left;
+  line-height: 1.6;
+}
+.vocabulary-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 4px 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.vocabulary-list li > span:last-child,
+.vocabulary-colloquial {
+  color: var(--muted);
+}
+.vocabulary-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 40px;
+  margin-top: 32px;
+}
+.vocabulary-settings fieldset {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.vocabulary-settings legend {
+  padding: 0;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.vocabulary-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.vocabulary-switch label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--cream);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.vocabulary-switch label:has(input:checked) {
+  border-color: var(--ink);
+  background: #e7f0e6;
+}
+.vocabulary-switch input {
+  margin: 0;
+  accent-color: var(--green);
+}
+.vocabulary-hint {
+  max-width: 640px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.vocabulary-training {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.vocabulary-direction {
+  margin: 0 0 14px;
+  color: var(--green);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.vocabulary-prompt {
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.vocabulary-prompt[lang='hy'],
+.vocabulary-training .option[lang='hy'] {
+  font-family: 'Noto Serif Armenian', Georgia, serif;
+}
+.vocabulary-training .option {
+  min-width: 0;
+  padding: 14px 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.vocabulary-explanation {
+  margin-top: 16px;
+}
+.vocabulary-training:focus {
+  outline: none;
+}
 @media (max-width: 650px) {
+  .vocabulary-sets {
+    grid-template-columns: 1fr;
+  }
+  .vocabulary-list li {
+    grid-template-columns: 1fr;
+  }
   .shell {
     padding: 22px 16px 35px;
+  }
+  .teacher-acknowledgment {
+    padding: 20px;
   }
   .topbar {
     align-items: flex-start;

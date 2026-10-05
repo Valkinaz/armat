@@ -1,6 +1,13 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router';
 import { useAppState } from '../app/AppState.tsx';
+import { useStartPractice } from '../app/useStartPractice.ts';
+import {
+  selectedVocabularyEntries,
+  vocabularyDirectionLabels,
+  vocabularyQuestions,
+} from '../vocabulary/model.ts';
+import { VocabularyList } from '../vocabulary/VocabularyList.tsx';
 import { Colloquial } from '../shared/Colloquial.tsx';
 import { Feedback } from '../shared/Feedback.tsx';
 import { Progress } from '../shared/Progress.tsx';
@@ -11,11 +18,14 @@ import { BuildAnswer } from './BuildAnswer.tsx';
 
 export function Training({ session }: { session: Session }) {
   const { dispatch } = useAppState();
+  const startPractice = useStartPractice();
   const location = useLocation();
   const questionRoot = useRef<HTMLElement>(null);
   const nextButton = useRef<HTMLButtonElement>(null);
   const resultHeading = useRef<HTMLHeadingElement>(null);
   const alphabet = session.kind === 'alphabet';
+  const vocabulary = session.kind === 'vocabulary';
+  const vocabularySettings = session.vocabulary;
   const question = session.questions[session.current];
   const answer = session.answer;
   const answered = Boolean(answer);
@@ -23,12 +33,14 @@ export function Training({ session }: { session: Session }) {
   useLayoutEffect(() => {
     document.title =
       (session.completed
-        ? alphabet
+        ? alphabet || vocabulary
           ? 'Тренировка завершена'
           : 'Практика завершена'
         : alphabet
           ? 'Тренировка букв'
-          : session.mode) + ' — Արմատ';
+          : vocabulary
+            ? 'Тренировка слов'
+            : session.mode) + ' — Արմատ';
     if (session.completed) resultHeading.current?.focus();
     else if (answered) nextButton.current?.focus();
     else
@@ -37,7 +49,7 @@ export function Training({ session }: { session: Session }) {
           '.option, .word-bank button:not(:disabled), .build-actions .primary:not(:disabled)',
         ) || questionRoot.current
       )?.focus();
-  }, [location.key, session.current, session.completed, session.mode, answered, alphabet]);
+  }, [location.key, session.current, session.completed, session.mode, answered, alphabet, vocabulary]);
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
@@ -46,11 +58,16 @@ export function Training({ session }: { session: Session }) {
   if (session.completed)
     return (
       <Result
-        alphabet={alphabet}
+        kind={session.kind}
         headingRef={resultHeading}
         correct={session.correct}
         total={session.questions.length}
         originPath={session.originPath}
+        onRestart={
+          vocabularySettings
+            ? () => startPractice('vocabulary', vocabularyQuestions(vocabularySettings), '', vocabularySettings)
+            : undefined
+        }
         onRetry={
           !alphabet && session.mistakes.length
             ? () => dispatch({ type: 'retry', questions: retryQuestions(session.mistakes) })
@@ -68,7 +85,9 @@ export function Training({ session }: { session: Session }) {
       ? question.example.singular
       : question.kind === 'choice'
         ? question.exercise.prompt
-        : '';
+        : question.kind === 'vocabulary'
+          ? question.prompt
+          : '';
   const feedback = !answer
     ? ''
     : answer.good
@@ -81,18 +100,29 @@ export function Training({ session }: { session: Session }) {
           ? 'Правильно: ' + question.example.plural
           : building
             ? 'Порядок слов отличается от образца'
-            : 'Правильный образец:';
-  const progressWord = alphabet ? 'Буква' : sentenceQuestion ? 'Задание' : 'Слово';
+            : vocabulary
+              ? 'Правильный перевод:'
+              : 'Правильный образец:';
+  const progressWord = alphabet ? 'Буква' : vocabulary ? 'Вопрос' : sentenceQuestion ? 'Задание' : 'Слово';
+  const wordQuestion = question.kind === 'vocabulary' ? question : null;
+  const wordMeanings = wordQuestion?.direction === 'hy-ru' ? wordQuestion.entries[0].meanings : [prompt];
+  const wordExplanation =
+    wordQuestion?.direction === 'hy-ru'
+      ? selectedVocabularyEntries(vocabularySettings?.setIds ?? []).filter((entry) =>
+          entry.meanings.some((meaning) => wordMeanings.includes(meaning)),
+        )
+      : wordQuestion?.entries ?? [];
+  const optionLanguage = alphabet || wordQuestion?.direction === 'hy-ru' ? 'ru' : 'hy';
 
   return (
     <section
       ref={questionRoot}
       tabIndex={-1}
-      className={alphabet ? 'training active' : 'grammar-training'}
-      aria-label={alphabet ? 'Тренировка букв' : 'Практика грамматики'}
+      className={alphabet ? 'training active' : vocabulary ? 'vocabulary-training' : 'grammar-training'}
+      aria-label={alphabet ? 'Тренировка букв' : vocabulary ? 'Тренировка слов' : 'Практика грамматики'}
     >
       <Link className="back" to={session.originPath} state={null}>
-        {alphabet ? '← К выбору букв' : '← К уроку'}
+        {alphabet ? '← К выбору букв' : vocabulary ? '← К выбору наборов' : '← К уроку'}
       </Link>
       <Progress
         label={progressWord + ' ' + (session.current + 1) + ' из ' + session.questions.length}
@@ -100,15 +130,22 @@ export function Training({ session }: { session: Session }) {
         total={session.questions.length}
       />
       <div className="question-card">
-        {!alphabet && <p className="eyebrow">{session.mode}</p>}
+        {!alphabet && session.mode && <p className="eyebrow">{session.mode}</p>}
+        {wordQuestion && (
+          <p className="vocabulary-direction">{vocabularyDirectionLabels[wordQuestion.direction]}</p>
+        )}
         <p className="prompt">
           {alphabet
             ? 'Как произносится эта буква?'
-            : building
-              ? 'Собери предложение по образцу урока'
-              : question.kind === 'choice'
-                ? 'Выбери подходящую форму глагола'
-                : 'Выбери форму множественного числа'}
+            : wordQuestion
+              ? wordQuestion.answers.length > 1
+                ? 'Выбери любой подходящий вариант'
+                : 'Выбери перевод'
+              : building
+                ? 'Собери предложение по образцу урока'
+                : question.kind === 'choice'
+                  ? 'Выбери подходящую форму глагола'
+                  : 'Выбери форму множественного числа'}
         </p>
         {building && question.exercise.variant === 'colloquial' && (
           <p className="colloquial">Разговорный вариант</p>
@@ -121,10 +158,11 @@ export function Training({ session }: { session: Session }) {
           !building && (
             <div
               className={
-                'grammar-prompt' +
-                (sentenceQuestion ? ' sentence' : prompt.length > 6 ? ' long' : '')
+                wordQuestion
+                  ? 'vocabulary-prompt'
+                  : 'grammar-prompt' + (sentenceQuestion ? ' sentence' : prompt.length > 6 ? ' long' : '')
               }
-              lang="hy"
+              lang={wordQuestion?.direction === 'ru-hy' ? 'ru' : 'hy'}
             >
               {prompt}
             </div>
@@ -143,7 +181,7 @@ export function Training({ session }: { session: Session }) {
             {question.options.map((value) => (
               <button
                 key={value}
-                lang={alphabet ? 'ru' : 'hy'}
+                lang={optionLanguage}
                 className={
                   'option' +
                   (answer
@@ -163,6 +201,11 @@ export function Training({ session }: { session: Session }) {
           </div>
         )}
         <Feedback good={answer?.good}>{feedback}</Feedback>
+        {answer && wordQuestion && (
+          <div className="vocabulary-explanation">
+            <VocabularyList entries={wordExplanation} />
+          </div>
+        )}
         {answer && item && (
           <>
             {answer.sentence && (
@@ -182,9 +225,11 @@ export function Training({ session }: { session: Session }) {
               ? 'Посмотреть результат'
               : alphabet
                 ? 'Следующая буква →'
-                : sentenceQuestion
-                  ? 'Следующее задание →'
-                  : 'Следующее слово →'}
+                : vocabulary
+                  ? 'Следующий вопрос →'
+                  : sentenceQuestion
+                    ? 'Следующее задание →'
+                    : 'Следующее слово →'}
           </button>
         </div>
       )}

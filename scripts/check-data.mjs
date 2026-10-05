@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { grammarLessons as lessons } from '../src/data/grammar-lessons.ts';
+import { vocabularyEntries, vocabularySets } from '../src/data/vocabulary.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
@@ -32,6 +33,34 @@ const hasText = (value) => typeof value === 'string' && value.trim().length > 0;
 const check = (condition, message) => {
   if (!condition) errors.push(message);
 };
+const vocabularyIds = new Set(), vocabularySpellings = new Set(), vocabularySetIds = new Set();
+check(vocabularyEntries.length > 0 && vocabularySets.length > 0, 'Словарь и наборы не должны быть пустыми.');
+for (const entry of vocabularyEntries) {
+  check(hasText(entry.id) && !vocabularyIds.has(entry.id), `Повторный или пустой id слова: ${entry.id}.`);
+  check(hasText(entry.hy) && !vocabularySpellings.has(entry.hy), `Повторное или пустое написание: ${entry.hy}.`);
+  check(Array.isArray(entry.meanings) && entry.meanings.length > 0 &&
+    entry.meanings.every(hasText) && new Set(entry.meanings).size === entry.meanings.length,
+    `Нет значений или повторяются значения у ${entry.id}.`);
+  check(entry.colloquial === undefined || typeof entry.colloquial === 'boolean',
+    `Неверная разговорная пометка у ${entry.id}.`);
+  vocabularyIds.add(entry.id);
+  vocabularySpellings.add(entry.hy);
+}
+const referencedVocabularyIds = new Set();
+for (const set of vocabularySets) {
+  check(hasText(set.id) && !vocabularySetIds.has(set.id) && hasText(set.title),
+    `Неверное название или id набора: ${set.id}.`);
+  check(Array.isArray(set.entryIds) && set.entryIds.length > 0 &&
+    new Set(set.entryIds).size === set.entryIds.length,
+    `Пустой набор или повторные ссылки: ${set.id}.`);
+  for (const id of set.entryIds ?? []) {
+    check(vocabularyIds.has(id), `В наборе ${set.id} неизвестное слово: ${id}.`);
+    referencedVocabularyIds.add(id);
+  }
+  vocabularySetIds.add(set.id);
+}
+check(vocabularyEntries.every((entry) => referencedVocabularyIds.has(entry.id)),
+  'В словаре есть слова, не включённые ни в один набор.');
 const lessonIds = new Set();
 if (!Array.isArray(lessons) || lessons.length === 0) {
   errors.push('В grammar-lessons.ts нет уроков.');
@@ -236,5 +265,5 @@ if (errors.length) {
   for (const error of errors) console.error(`✗ ${error}`);
   process.exitCode = 1;
 } else {
-  console.log(`✓ Данные согласованы: ${alphabet.length} букв; уроков — ${lessons.length}.`);
+  console.log(`✓ Данные согласованы: ${alphabet.length} букв; уроков — ${lessons.length}; слов и выражений — ${vocabularyEntries.length}; наборов — ${vocabularySets.length}.`);
 }

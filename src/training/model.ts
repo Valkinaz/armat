@@ -1,4 +1,7 @@
-import type { Letter, LessonBlock, PluralExample, SentenceExercise } from '../data/types.ts';
+import type {
+  Letter, LessonBlock, PluralExample, SentenceExercise, VocabularySettings,
+} from '../data/types.ts';
+import type { VocabularyQuestion } from '../vocabulary/model.ts';
 
 export type Random = () => number;
 export function shuffled<T>(items: readonly T[], random: Random = Math.random): T[] {
@@ -12,6 +15,7 @@ export function shuffled<T>(items: readonly T[], random: Random = Math.random): 
 
 export type GrammarItem = PluralExample | SentenceExercise;
 export type Question =
+  | VocabularyQuestion
   | { kind: 'letter'; letter: Letter; options: string[] }
   | { kind: 'plural'; example: PluralExample; options: string[] }
   | { kind: 'choice'; exercise: Extract<SentenceExercise, { type: 'choice' }>; options: string[] }
@@ -101,7 +105,7 @@ export function retryQuestions(
   random: Random = Math.random,
 ): Question[] {
   return shuffled(mistakes, random).map((question) => {
-    if (question.kind === 'letter')
+    if (question.kind === 'letter' || question.kind === 'vocabulary')
       return { ...question, options: shuffled(question.options, random) };
     return prepareGrammarQuestion(
       question.kind === 'plural' ? question.example : question.exercise,
@@ -113,6 +117,7 @@ export function retryQuestions(
 export function acceptedAnswers(question: Exclude<Question, { kind: 'build' }>): string[] {
   if (question.kind === 'letter') return [question.letter.sound];
   if (question.kind === 'plural') return [question.example.plural];
+  if (question.kind === 'vocabulary') return question.answers;
   return question.exercise.answers;
 }
 
@@ -140,7 +145,8 @@ export function evaluateAnswer(question: Question, value: string): Answer {
 export interface Session {
   id: string;
   originPath: string;
-  kind: 'alphabet' | 'grammar';
+  kind: 'alphabet' | 'grammar' | 'vocabulary';
+  vocabulary?: VocabularySettings;
   mode: string;
   questions: Question[];
   current: number;
@@ -150,10 +156,15 @@ export interface Session {
   answer: Answer | null;
   completed: boolean;
 }
-export type SessionSetup = Pick<Session, 'id' | 'originPath' | 'kind' | 'mode' | 'questions'>;
+export type SessionSetup = Pick<
+  Session, 'id' | 'originPath' | 'kind' | 'mode' | 'questions' | 'vocabulary'
+>;
 export function createSession(setup: SessionSetup): Session {
   return {
     ...setup,
+    ...(setup.vocabulary && {
+      vocabulary: { ...setup.vocabulary, setIds: [...setup.vocabulary.setIds] },
+    }),
     current: 0,
     correct: 0,
     mistakes: [],

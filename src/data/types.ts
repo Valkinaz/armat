@@ -4,6 +4,27 @@ export interface Letter {
   sound: string;
 }
 
+export interface VocabularyEntry {
+  id: string;
+  hy: string;
+  meanings: string[];
+  colloquial?: boolean;
+}
+
+export interface VocabularySet {
+  id: string;
+  title: string;
+  entryIds: string[];
+}
+
+export type VocabularyDirection = 'hy-ru' | 'ru-hy';
+
+export interface VocabularySettings {
+  setIds: string[];
+  direction: VocabularyDirection;
+  size: 20 | 'all';
+}
+
 export interface PluralExample {
   singular: string;
   plural: string;
