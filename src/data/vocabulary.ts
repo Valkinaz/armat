@@ -65,6 +65,20 @@ export const vocabularyEntries: VocabularyEntry[] = [
   { id: 'october', hy: 'հոկտեմբեր', meanings: ['октябрь'] },
   { id: 'november', hy: 'նոյեմբեր', meanings: ['ноябрь'] },
   { id: 'december', hy: 'դեկտեմբեր', meanings: ['декабрь'] },
+  { id: 'black', hy: 'սև', meanings: ['чёрный'] },
+  { id: 'white', hy: 'սպիտակ', meanings: ['белый'] },
+  { id: 'yellow', hy: 'դեղին', meanings: ['жёлтый'] },
+  { id: 'green', hy: 'կանաչ', meanings: ['зелёный'] },
+  { id: 'blue', hy: 'կապույտ', meanings: ['синий'] },
+  { id: 'red', hy: 'կարմիր', meanings: ['красный'] },
+  { id: 'light-blue', hy: 'երկնագույն', meanings: ['голубой'] },
+  { id: 'orange', hy: 'նարնջագույն', meanings: ['оранжевый'] },
+  { id: 'pink', hy: 'վարդագույն', meanings: ['розовый'] },
+  { id: 'gray', hy: 'մոխրագույն', meanings: ['серый'] },
+  { id: 'purple', hy: 'մանուշակագույն', meanings: ['фиолетовый'] },
+  { id: 'golden', hy: 'ոսկեգույն', meanings: ['золотистый'] },
+  { id: 'silver', hy: 'արծաթագույն', meanings: ['серебристый'] },
+  { id: 'brown', hy: 'դարչնագույն', meanings: ['коричневый'] },
 ];
 
 export const vocabularySets: VocabularySet[] = [
@@ -100,6 +114,14 @@ export const vocabularySets: VocabularySet[] = [
     entryIds: [
       'january', 'february', 'march', 'april', 'may', 'june',
       'july', 'august', 'september', 'october', 'november', 'december',
+    ],
+  },
+  {
+    id: 'colors',
+    title: 'Цвета',
+    entryIds: [
+      'black', 'white', 'yellow', 'green', 'blue', 'red', 'light-blue',
+      'orange', 'pink', 'gray', 'purple', 'golden', 'silver', 'brown',
     ],
   },
 ];
