@@ -203,3 +203,76 @@ describe('состояние занятия', () => {
     expect(current.correct).toBe(1);
   });
 });
+
+
+describe('уроки об артиклях', () => {
+  const lessons = grammarLessons.filter((lesson) => ['definite-article', 'possessive-articles'].includes(lesson.id));
+  it('проверяет целое слово, сохраняет инструкцию, пунктуацию и допустимые альтернативы', () => {
+    expect(lessons).toHaveLength(2);
+    for (const lesson of lessons) for (const block of lesson.blocks) {
+      if (!block.exercises) throw new Error('Expected sentence block');
+      for (const exercise of block.exercises) {
+        if (exercise.type !== 'choice') continue;
+        expect(exercise.instruction).toBeTruthy();
+        expect(exercise.instruction).not.toContain('глагола');
+        expect(exercise.prompt).toContain('___');
+        expect(exercise.prompt.endsWith('։')).toBe(true);
+        const question = prepareGrammarQuestion(exercise, constantRandom);
+        for (const answer of exercise.answers) expect(evaluateAnswer(question, answer).good).toBe(true);
+        for (const wrong of exercise.options.filter((value) => !exercise.answers.includes(value)))
+          expect(evaluateAnswer(question, wrong).good).toBe(false);
+        expect(retryQuestions([question], constantRandom)[0]).toMatchObject({ exercise });
+      }
+      const mixed = mixedBlockItems(block, constantRandom) as (typeof block.exercises);
+      expect(mixed).toHaveLength(Math.min(3, block.examples.length));
+      expect(new Set(mixed.map((item) => item.exampleId)).size).toBe(mixed.length);
+      expect(new Set(mixed.map((item) => item.type))).toEqual(new Set(['choice', 'build']));
+    }
+  });
+  it('использует проверенные предложения из ДЗ', () => {
+    const examples = lessons.flatMap((lesson) => lesson.blocks.flatMap((block) => block.exercises ? block.examples : []));
+    for (const sentence of ['Իմ գրիչը սև է։', 'Նրա ամուսինը զինվորական է։', 'Մեր տունը մեծ է։', 'Ձեր այգին գեղեցիկ է։', 'Սենյակդ մաքուր է։', 'Գրքերդ հետաքրքիր են։'])
+      expect(examples.some((item) => 'sentence' in item && item.sentence === sentence)).toBe(true);
+  });
+  it('принимает обе формы перед իմ, но сохраняет образец сборки', () => {
+    const context = lessons[0].blocks.find((block) => block.id === 'context')!;
+    const choice = context.exercises!.find((item) => item.id === 'article-your-brother-my-friend-choice')!;
+    if (choice.type !== 'choice') throw new Error('Expected choice');
+    expect(choice.prompt).toBe('Քո ___ իմ ընկերն է։');
+    expect(choice.answers).toEqual(['եղբայրն', 'եղբայրը']);
+    const question = prepareGrammarQuestion(choice);
+    for (const answer of choice.answers) {
+      expect(evaluateAnswer(question, answer)).toMatchObject({ good: true, sentence: choice.prompt.replace('___', answer) });
+      expect(evaluateAnswer(retryQuestions([question])[0], answer).good).toBe(true);
+    }
+    const build = context.exercises!.find((item) => item.id === 'article-your-brother-my-friend-build')!;
+    expect(build.sentence).toBe('Քո եղբայրն իմ ընկերն է։');
+    expect(evaluateAnswer(prepareGrammarQuestion(build), build.sentence).good).toBe(true);
+  });
+  it('возвращает согласованные ответы и ограниченные исключения', () => {
+    const definite = lessons[0];
+    const exercises = definite.blocks.flatMap((block) => block.exercises ?? []);
+    for (const [id, answer, wrong] of [
+      ['article-not-my-book', 'գիրքը', 'գիրքն'],
+      ['article-this-my-house', 'տունն', 'տունը'],
+      ['article-he-doctor', 'բժիշկ', 'բժիշկն'],
+      ['article-these-men', 'տղամարդիկ', 'տղամարդիկը'],
+      ['article-this-woman-doctor', 'կինը', 'կինն'],
+    ]) {
+      const choice = exercises.find((item) => item.id === id + '-choice')!;
+      if (choice.type !== 'choice') throw new Error('Expected choice');
+      expect(choice.answers).toEqual([answer]);
+      expect(evaluateAnswer(prepareGrammarQuestion(choice), wrong).good).toBe(false);
+    }
+    const exceptions = definite.blocks.find((block) => block.id === 'exceptions')!;
+    expect(exceptions.detail).toContain('մարդիկ');
+    expect(exceptions.detail).toContain('կանայք');
+    expect(exceptions.detail).toContain('на другие контексты его не распространяем');
+    expect(exceptions.examples).toHaveLength(2);
+  });
+  it('не включает тему имени, фамилии и отчества', () => {
+    const content = JSON.stringify(lessons);
+    for (const word of ['անուն', 'ազգանուն', 'հայրանուն'])
+      expect(content.toLowerCase()).not.toContain(word);
+  });
+});

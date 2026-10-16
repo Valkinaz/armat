@@ -120,10 +120,10 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
           `Пустой разговорный вариант в ${example.id}.`,
         );
         const words = (example.sentence || '').split(' '),
-          index = example.verbIndex ?? words.length - 1;
+          index = example.choice?.wordIndex ?? example.verbIndex ?? words.length - 1;
         check(
-          Number.isInteger(index) && words[index]?.replace(/։$/, '') === example.form,
-          `Форма глагола не соответствует указанному слову в ${example.id}.`,
+          Number.isInteger(index) && words[index]?.replace(/[։:?!]+$/, '') === example.form,
+          `Форма не соответствует указанному слову в ${example.id}.`,
         );
         check(
           block.exercises.some((item) => item.exampleId === example.id && item.type === 'choice'),
@@ -177,12 +177,22 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
             item.prompt?.replace('___', example.form) === example.sentence,
             `${context}: пропуск не соответствует исходному предложению.`,
           );
-          const accepted =
+          const accepted = example.choice?.answers ?? (
             example.form === 'է'
               ? ['է', 'ա']
               : example.form === 'չէ'
                 ? ['չէ', 'չի']
-                : [example.form];
+                : [example.form]
+          );
+          if (example.choice) {
+            check(hasText(example.choice.instruction) && item.instruction === example.choice.instruction,
+              `${context}: нет инструкции или она расходится с источником.`);
+            check(Array.isArray(accepted) && accepted.length > 0 && accepted.every(hasText) &&
+              new Set(accepted).size === accepted.length && accepted.includes(example.form),
+              `${context}: неверные допустимые ответы.`);
+            check(JSON.stringify(item.options) === JSON.stringify(example.choice.options),
+              `${context}: варианты расходятся с источником.`);
+          }
           check(
             Array.isArray(item.answers) &&
               item.answers.length === accepted.length &&

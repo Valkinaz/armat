@@ -42,6 +42,12 @@ export interface SentenceExample {
   note: string;
   colloquial?: string;
   verbIndex?: number;
+  choice?: {
+    wordIndex: number;
+    answers: string[];
+    options: string[];
+    instruction: string;
+  };
 }
 
 interface ExerciseBase {
@@ -55,6 +61,7 @@ interface ExerciseBase {
 
 export interface ChoiceExercise extends ExerciseBase {
   type: 'choice';
+  instruction?: string;
   prompt: string;
   answers: string[];
   options: string[];

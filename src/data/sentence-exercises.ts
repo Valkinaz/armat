@@ -8,11 +8,11 @@ export function createSentenceLesson(source: SentenceLessonSource): Lesson {
       ...block,
       exercises: block.examples.flatMap((example) => {
         const words = example.sentence.split(' ');
-        const verbIndex = example.verbIndex ?? words.length - 1;
+        const wordIndex = example.choice?.wordIndex ?? example.verbIndex ?? words.length - 1;
         const promptWords = [...words];
-        promptWords[verbIndex] = promptWords[verbIndex].replace(example.form, '___');
-        const answers =
-          example.form === 'է' ? ['է', 'ա'] : example.form === 'չէ' ? ['չէ', 'չի'] : [example.form];
+        promptWords[wordIndex] = promptWords[wordIndex].replace(example.form, '___');
+        const answers = example.choice?.answers ??
+          (example.form === 'է' ? ['է', 'ա'] : example.form === 'չէ' ? ['չէ', 'չի'] : [example.form]);
         const forms = example.form.startsWith('չ')
           ? ['չեմ', 'չես', 'չէ', 'չենք', 'չեք', 'չեն']
           : ['եմ', 'ես', 'է', 'ենք', 'եք', 'են'];
@@ -34,7 +34,8 @@ export function createSentenceLesson(source: SentenceLessonSource): Lesson {
             type: 'choice',
             prompt: promptWords.join(' '),
             answers,
-            options: [...answers, ...distractors.slice(0, 4 - answers.length)],
+            options: example.choice?.options ?? [...answers, ...distractors.slice(0, 4 - answers.length)],
+            instruction: example.choice?.instruction,
           },
           { ...shared, id: example.id + '-build', type: 'build', words },
         ];

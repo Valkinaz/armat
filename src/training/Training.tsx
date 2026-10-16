@@ -144,7 +144,7 @@ export function Training({ session }: { session: Session }) {
               : building
                 ? 'Собери предложение по образцу урока'
                 : question.kind === 'choice'
-                  ? 'Выбери подходящую форму глагола'
+                  ? question.exercise.instruction ?? 'Выбери подходящую форму глагола'
                   : 'Выбери форму множественного числа'}
         </p>
         {building && question.exercise.variant === 'colloquial' && (

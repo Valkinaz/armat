@@ -94,7 +94,7 @@ describe('словарные вопросы', () => {
     expect(reverse.find((question) => question.prompt === 'тётя (мамина сестра)')?.answers)
       .toEqual(['մորաքույր', 'մորքուր']);
     const forward = vocabularyQuestions(settings('hy-ru', ['family']), random);
-    for (const entry of vocabularyEntries.filter((entry) => entry.colloquial)) {
+    for (const entry of selectedVocabularyEntries(['family']).filter((entry) => entry.colloquial)) {
       const question = forward.find((question) => question.prompt === entry.hy)!;
       expect(question.entries).toContain(entry);
       expect(question.answers).toEqual([entry.meanings.join('; ')]);
@@ -169,5 +169,26 @@ describe('словарная сессия', () => {
     const fixed = sessionReducer(retried, { type: 'choose', value: 'ախպեր' })!;
     expect(fixed.correct).toBe(1);
     expect(fixed.mistakes).toEqual([]);
+  });
+});
+
+
+describe('наборы местоимений', () => {
+  const ids = ['personal-pronouns', 'possessive-pronouns'];
+  it('содержат только согласованные формы и разделяют направления перевода', () => {
+    const forward = vocabularyQuestions(settings('hy-ru', ids), random);
+    expect(forward).toHaveLength(16);
+    expect(forward.find((q) => q.prompt === 'նա')?.answers).toEqual(['он; она']);
+    expect(forward.find((q) => q.prompt === 'նրա')?.answers).toEqual(['его; её']);
+    const reverse = vocabularyQuestions(settings('ru-hy', ids), random);
+    expect(reverse).toHaveLength(14);
+    for (const meaning of ['он', 'она'])
+      expect(reverse.find((q) => q.prompt === meaning)?.answers).toEqual(['նա', 'ինքը']);
+    for (const meaning of ['его', 'её'])
+      expect(reverse.find((q) => q.prompt === meaning)?.answers).toEqual(['նրա', 'իրա']);
+    expect(reverse.find((q) => q.prompt === 'они')?.answers).toEqual(['նրանք', 'իրանք']);
+    expect(reverse.find((q) => q.prompt === 'их')?.answers).toEqual(['նրանց', 'իրանց']);
+    expect(selectedVocabularyEntries(ids).filter((entry) => entry.colloquial)).toHaveLength(4);
+    expect(new Set(forward.map((q) => q.prompt)).size).toBe(16);
   });
 });

@@ -1,3 +1,4 @@
+import { articleLessons } from './article-lessons.ts';
 import type { Lesson, SentenceLessonSource } from './types.ts';
 import { createSentenceLesson } from './sentence-exercises.ts';
 
@@ -692,3 +693,6 @@ const auxiliarySource: SentenceLessonSource = {
 };
 
 grammarLessons.push(createSentenceLesson(auxiliarySource));
+
+// Новые темы следуют за существующими уроками.
+grammarLessons.push(...articleLessons);

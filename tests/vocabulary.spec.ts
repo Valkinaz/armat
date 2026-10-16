@@ -223,3 +223,24 @@ for (const width of [390, 1280]) {
     expect(errors).toEqual([]);
   });
 }
+
+
+for (const direction of ['hy-ru', 'ru-hy'] as const) {
+  test(`местоимения вместе, ${direction}: полный проход и разговорные ответы`, async ({ page }) => {
+    await page.goto('/words');
+    for (const title of ['Базовые местоимения', 'Притяжательные местоимения'])
+      await page.getByRole('button', { name: title, exact: true }).click();
+    await page.getByRole('radio', { name: directionLabels[direction], exact: true }).check();
+    await page.getByRole('radio', { name: 'Все', exact: true }).check();
+    await page.getByRole('button', { name: /Начать тренировку/ }).click();
+    const seen = new Set<string>();
+    while (await page.getByRole('region', { name: 'Тренировка слов' }).isVisible()) {
+      const question = await answerWord(page, direction);
+      expect(seen.has(question.prompt)).toBe(false);
+      seen.add(question.prompt);
+      await page.locator('.next-row button').click();
+    }
+    expect(seen.size).toBe(direction === 'hy-ru' ? 16 : 14);
+    await expect(page.getByText(`Правильных ответов: ${seen.size} из ${seen.size}.`)).toBeVisible();
+  });
+}

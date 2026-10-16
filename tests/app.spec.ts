@@ -29,7 +29,8 @@ async function grammarQuestion(page: Page) {
     };
   }
   const prompt = await page.locator('.grammar-prompt').innerText();
-  const exercise = exercises.find((item) => item.type === 'choice' && item.prompt === prompt);
+  const ru = await page.locator('.grammar-translation').innerText();
+  const exercise = exercises.find((item) => item.type === 'choice' && item.prompt === prompt && item.ru === ru);
   if (exercise?.type === 'choice') {
     return {
       kind: 'choice' as const,
@@ -340,6 +341,8 @@ for (const width of [390, 1280]) {
     for (const [path, name] of [
       ['/alphabet', 'alphabet'],
       [lessonPath, 'lesson'],
+      ['/grammar/definite-article', 'definite-article'],
+      ['/grammar/possessive-articles', 'possessive-articles'],
     ]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
@@ -359,5 +362,53 @@ for (const width of [390, 1280]) {
       });
     }
     expect(errors).toEqual([]);
+  });
+}
+
+
+for (const lessonId of ['definite-article', 'possessive-articles']) {
+  test(`${lessonId}: выбор целого слова, смешанная практика и повтор ошибки`, async ({ page }) => {
+    await page.goto('/grammar/' + lessonId);
+    await page.getByRole('button', { name: 'Выбрать форму', exact: true }).first().click();
+    await expect(page.locator('.prompt')).not.toContainText('глагола');
+    await answerGrammar(page);
+    await page.getByRole('link', { name: '← К уроку' }).click();
+    await expect(page).toHaveURL('/grammar/' + lessonId);
+    await page.getByRole('button', { name: /Смешанная тренировка/ }).click();
+    const formats = new Set<string>();
+    let wrongKey = '';
+    while (await page.getByRole('region', { name: 'Практика грамматики' }).isVisible()) {
+      const question = await grammarQuestion(page);
+      formats.add(question.kind);
+      const wrong = !wrongKey;
+      if (wrong) wrongKey = question.key;
+      await answerGrammar(page, wrong);
+      await nextGrammar(page);
+    }
+    expect([...formats].sort()).toEqual(['build', 'choice']);
+    await page.getByRole('button', { name: 'Повторить ошибки' }).click();
+    expect((await grammarQuestion(page)).key).toBe(wrongKey);
+    await answerGrammar(page);
+    await nextGrammar(page);
+    await expect(page.getByText('Правильных ответов: 1 из 1.')).toBeVisible();
+  });
+}
+
+
+for (const answer of ['եղբայրն', 'եղբայրը']) {
+  test(`контекст артикля: принимает ${answer} и подсвечивает обе формы`, async ({ page }) => {
+    await page.addInitScript(() => { Math.random = () => 0; });
+    await page.goto('/grammar/definite-article/blocks/context');
+    const block = page.locator('.block').filter({ has: page.getByRole('heading', { name: 'Артикль в предложении', exact: true }) });
+    await block.getByRole('button', { name: 'Выбрать форму', exact: true }).click();
+    await expect(page.locator('.grammar-prompt')).toHaveText('Քո ___ իմ ընկերն է։');
+    await expect(page.locator('.prompt')).toHaveText('Выбери любой подходящий вариант с определённым артиклем');
+    await page.getByRole('button', { name: answer, exact: true }).click();
+    await expect(page.locator('.feedback')).toHaveClass(/good/);
+    await expect(page.locator('.option.correct')).toHaveCount(2);
+    await expect(page.locator('.grammar-answer')).toHaveText(`Քո ${answer} իմ ընկերն է։`);
+    await expect(page.locator('.grammar-explanation')).toContainText('непосредственно перед է');
+    await page.getByRole('link', { name: '← К уроку' }).click();
+    await expect(page).toHaveURL('/grammar/definite-article/blocks/context');
   });
 }
