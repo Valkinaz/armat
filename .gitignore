@@ -1,6 +1,7 @@
 # Служебные файлы ОС и локального запуска
 .DS_Store
 Thumbs.db
+debug.log
 __pycache__/
 .sites-runtime/
 node_modules/
