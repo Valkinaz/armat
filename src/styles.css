@@ -479,6 +479,7 @@ h1 {
   line-height: 1.5;
 }
 .block-detail {
+  white-space: pre-line;
   max-width: 780px;
   margin: 0 0 20px;
   color: var(--muted);
