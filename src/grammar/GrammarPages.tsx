@@ -34,6 +34,20 @@ export function GrammarPage() {
   );
 }
 
+function Explanation({ text, className }: { text: string; className?: string }) {
+  return text.split('\n\n').map((paragraph, index) => (
+    <p className={className} key={index}>
+      {paragraph.split(/(\*\*[^*]+\*\*)/g).map((part, partIndex) =>
+        part.startsWith('**') && part.endsWith('**') ? (
+          <strong key={partIndex}>{part.slice(2, -2)}</strong>
+        ) : (
+          part
+        ),
+      )}
+    </p>
+  ));
+}
+
 function Example({ item }: { item: PluralExample | SentenceExample }) {
   return (
     <>
@@ -90,7 +104,7 @@ function LessonBlockView({
           ))}
         </div>
       </div>
-      <p className="block-rule">{block.rule}</p>
+      <Explanation text={block.rule} className="block-rule" />
       <p className="block-detail">{block.detail}</p>
       {forms.length > 0 && (
         <div className="forms-wrap">
@@ -154,7 +168,7 @@ export function LessonPage() {
             {lesson.title}
           </h1>
           <p>{lesson.lead}</p>
-          {lesson.intro && <p>{lesson.intro}</p>}
+          {lesson.intro && <Explanation text={lesson.intro} />}
         </div>
         <div className="block-list">
           {lesson.blocks.map((item, index) => (
