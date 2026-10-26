@@ -207,6 +207,33 @@ describe('состояние занятия', () => {
 
 describe('уроки об артиклях', () => {
   const lessons = grammarLessons.filter((lesson) => ['definite-article', 'possessive-articles'].includes(lesson.id));
+  it('закрепляет множественное число притяжательных форм на шести примерах в обоих режимах', () => {
+    const block = lessons.find((lesson) => lesson.id === 'possessive-articles')!
+      .blocks.find((block) => block.id === 'plural') as SentenceBlock;
+    expect(block.examples.map((example) => example.sentence)).toEqual([
+      'Մազերս երկար են։', 'Գրքերդ հետաքրքիր են։', 'Ծաղիկներդ սիրուն են։',
+      'Տետրերս կանաչ են։', 'Հեռախոսներս նոր են։', 'Գրիչներդ սև են։',
+    ]);
+    for (const suffix of ['ս', 'դ'])
+      expect(block.examples.filter((example) => example.form.endsWith(suffix))).toHaveLength(3);
+    expect(blockItems(block, 'choice')).toHaveLength(6);
+    expect(blockItems(block, 'build')).toHaveLength(6);
+    for (const example of block.examples) {
+      const exercises = block.exercises.filter((exercise) => exercise.exampleId === example.id);
+      expect(exercises.map((exercise) => exercise.type)).toEqual(['choice', 'build']);
+      for (const exercise of exercises) {
+        const question = prepareGrammarQuestion(exercise, constantRandom);
+        if (exercise.type === 'choice') {
+          expect(exercise.answers).toEqual([example.form]);
+          expect(exercise.options).toContain(example.form);
+          expect(evaluateAnswer(question, example.form).good).toBe(true);
+        } else {
+          expect(exercise.words.join(' ')).toBe(example.sentence);
+          expect(evaluateAnswer(question, exercise.words.join(' ')).good).toBe(true);
+        }
+      }
+    }
+  });
   it('проверяет целое слово, сохраняет инструкцию, пунктуацию и допустимые альтернативы', () => {
     expect(lessons).toHaveLength(2);
     for (const lesson of lessons) for (const block of lesson.blocks) {

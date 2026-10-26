@@ -366,6 +366,39 @@ for (const width of [390, 1280]) {
 }
 
 
+for (const mode of ['Выбрать форму', 'Собрать предложение']) {
+  test(`притяжательные артикли во множественном числе: ${mode}`, async ({ page }) => {
+    await page.goto('/grammar/possessive-articles/blocks/plural');
+    const block = page.locator('.block').filter({ has: page.getByRole('heading', { name: 'Несколько предметов', exact: true }) });
+    await expect(block.locator('.block-rule')).toHaveText([
+      'Притяжательные артикли используются и во множественном числе.',
+      'Сначала образуем множественное число существительного с помощью суффикса -եր или -ներ, а затем добавляем притяжательный артикль:',
+      '-ս — мои.', '-դ — твои.',
+    ]);
+    await expect(block.locator('.block-detail')).toHaveText([
+      'ծաղիկ → ծաղիկներ → ծաղիկներս', 'Цветок → цветы → мои цветы.',
+      'ծաղիկներս — мои цветы.', 'ծաղիկներդ — твои цветы.',
+    ]);
+    await expect(block.locator('.example-pair')).toHaveText([
+      'Մազերս երկար են։', 'Գրքերդ հետաքրքիր են։', 'Ծաղիկներդ սիրուն են։',
+      'Տետրերս կանաչ են։', 'Հեռախոսներս նոր են։', 'Գրիչներդ սև են։',
+    ]);
+    await block.getByRole('button', { name: mode, exact: true }).click();
+    const seen = new Set<string>();
+    for (let index = 0; index < 6; index++) {
+      seen.add(await page.locator('.grammar-translation').innerText());
+      await answerGrammar(page);
+      await expect(page.locator('.grammar-explanation')).not.toBeEmpty();
+      await nextGrammar(page);
+    }
+    expect(seen).toEqual(new Set([
+      'Мои волосы длинные.', 'Твои книги интересные.', 'Твои цветы красивые.',
+      'Мои тетради зелёные.', 'Мои телефоны новые.', 'Твои ручки чёрные.',
+    ]));
+    await expect(page.getByText('Правильных ответов: 6 из 6.')).toBeVisible();
+  });
+}
+
 for (const lessonId of ['definite-article', 'possessive-articles']) {
   test(`${lessonId}: выбор целого слова, смешанная практика и повтор ошибки`, async ({ page }) => {
     await page.goto('/grammar/' + lessonId);
