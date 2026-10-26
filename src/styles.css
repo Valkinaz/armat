@@ -474,9 +474,14 @@ h1 {
   font-size: 1.35rem;
 }
 .block-rule {
-  margin: 0 0 8px;
-  font-weight: 700;
+  margin: 0 0 12px;
+  font-weight: 400;
   line-height: 1.5;
+}
+.block-rule strong,
+.block-detail strong,
+.lesson-header strong {
+  font-weight: 600;
 }
 .block-detail {
   white-space: pre-line;
@@ -484,6 +489,9 @@ h1 {
   margin: 0 0 20px;
   color: var(--muted);
   line-height: 1.55;
+}
+.block-detail:has(+ .block-detail) {
+  margin-bottom: 12px;
 }
 .examples {
   display: grid;

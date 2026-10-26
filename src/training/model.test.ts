@@ -249,7 +249,7 @@ describe('уроки об артиклях', () => {
     expect(build.sentence).toBe('Քո եղբայրն իմ ընկերն է։');
     expect(evaluateAnswer(prepareGrammarQuestion(build), build.sentence).good).toBe(true);
   });
-  it('возвращает согласованные ответы и ограниченные исключения', () => {
+  it('возвращает согласованные ответы и описанные в уроке исключения', () => {
     const definite = lessons[0];
     const exercises = definite.blocks.flatMap((block) => block.exercises ?? []);
     for (const [id, answer, wrong] of [
@@ -265,9 +265,9 @@ describe('уроки об артиклях', () => {
       expect(evaluateAnswer(prepareGrammarQuestion(choice), wrong).good).toBe(false);
     }
     const exceptions = definite.blocks.find((block) => block.id === 'exceptions')!;
-    expect(exceptions.detail).toContain('մարդիկ');
-    expect(exceptions.detail).toContain('կանայք');
-    expect(exceptions.detail).toContain('на другие контексты его не распространяем');
+    const detail = exceptions.detail.replaceAll('**', '');
+    expect(detail).toContain('Некоторые особые формы множественного числа, например մարդիկ (люди) и կանայք (женщины), не получают определённый артикль.');
+    expect(detail).toContain('В предложении «Այս տղամարդիկ ռուսներ են։» слово տղամարդիկ употребляется без определённого артикля.');
     expect(exceptions.examples).toHaveLength(4);
   });
   it('различает национальность без артикля и конкретного врача с артиклем в пятом блоке', () => {
