@@ -105,7 +105,11 @@ function LessonBlockView({
         </div>
       </div>
       <Explanation text={block.rule} className="block-rule" />
-      <p className="block-detail">{block.detail}</p>
+      {block.detail.includes('**') ? (
+        <Explanation text={block.detail} className="block-detail" />
+      ) : (
+        <p className="block-detail">{block.detail}</p>
+      )}
       {forms.length > 0 && (
         <div className="forms-wrap">
           <table className="forms-table" aria-label={block.title + ': формы по лицам'}>
