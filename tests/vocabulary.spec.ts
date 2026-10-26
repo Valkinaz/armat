@@ -14,8 +14,8 @@ const addedSets = [
   ['home', 'Дом и повседневные предметы', 12],
   ['study', 'Учёба и учебные принадлежности', 12],
   ['demonstratives-and-questions', 'Указательные и вопросительные слова', 9],
-  ['family', 'Семья: близкие родственники', 15],
-  ['extended-family', 'Семья: другие родственники', 21],
+  ['family', 'Семья: близкие родственники', 16],
+  ['extended-family', 'Семья: другие родственники', 20],
 ] as const;
 
 async function startWords(page: Page, title: string, direction: VocabularyDirection) {

@@ -178,6 +178,7 @@ export const vocabularySets: VocabularySet[] = [
     id: 'family',
     title: 'Семья: близкие родственники',
     entryIds: [
+      'family',
       'husband', 'wife', 'parent', 'father', 'mother', 'sister', 'brother', 'brother-colloquial',
       'daughter', 'daughter-colloquial', 'son', 'son-colloquial', 'grandmother', 'grandfather',
       'grandchild',
@@ -187,7 +188,6 @@ export const vocabularySets: VocabularySet[] = [
     id: 'extended-family',
     title: 'Семья: другие родственники',
     entryIds: [
-      'family',
       'paternal-aunt', 'paternal-aunt-colloquial', 'maternal-aunt', 'maternal-aunt-colloquial',
       'paternal-uncle', 'paternal-uncle-colloquial', 'maternal-uncle', 'maternal-uncle-colloquial',
       'son-in-law', 'daughter-in-law', 'wifes-father', 'wifes-mother',
