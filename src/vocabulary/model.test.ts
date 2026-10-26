@@ -86,15 +86,15 @@ describe('словарные вопросы', () => {
   });
 
   it('объединяет разговорные формы по значению и сохраняет уточнения родства', () => {
-    const reverse = vocabularyQuestions(settings('ru-hy', ['family']), random);
+    const reverse = vocabularyQuestions(settings('ru-hy', ['family', 'extended-family']), random);
     expect(reverse.filter((question) => question.prompt === 'брат')).toHaveLength(1);
     expect(reverse.find((question) => question.prompt === 'брат')?.answers).toEqual(['եղբայր', 'ախպեր']);
     expect(reverse.find((question) => question.prompt === 'тётя (папина сестра)')?.answers)
       .toEqual(['հորաքույր', 'հորքուր']);
     expect(reverse.find((question) => question.prompt === 'тётя (мамина сестра)')?.answers)
       .toEqual(['մորաքույր', 'մորքուր']);
-    const forward = vocabularyQuestions(settings('hy-ru', ['family']), random);
-    for (const entry of selectedVocabularyEntries(['family']).filter((entry) => entry.colloquial)) {
+    const forward = vocabularyQuestions(settings('hy-ru', ['family', 'extended-family']), random);
+    for (const entry of selectedVocabularyEntries(['family', 'extended-family']).filter((entry) => entry.colloquial)) {
       const question = forward.find((question) => question.prompt === entry.hy)!;
       expect(question.entries).toContain(entry);
       expect(question.answers).toEqual([entry.meanings.join('; ')]);
@@ -190,5 +190,58 @@ describe('наборы местоимений', () => {
     expect(reverse.find((q) => q.prompt === 'их')?.answers).toEqual(['նրանց', 'իրանց']);
     expect(selectedVocabularyEntries(ids).filter((entry) => entry.colloquial)).toHaveLength(4);
     expect(new Set(forward.map((q) => q.prompt)).size).toBe(16);
+  });
+});
+
+describe('расширенные тематические наборы', () => {
+  it('сохраняет все прежние семейные записи, разделяя их без дубликатов', () => {
+    const close = vocabularySets.find((set) => set.id === 'family')!;
+    const other = vocabularySets.find((set) => set.id === 'extended-family')!;
+    expect(close.entryIds.filter((id) => other.entryIds.includes(id))).toEqual([]);
+    expect([...close.entryIds, ...other.entryIds].sort()).toEqual([
+      'family', 'father', 'mother', 'sister', 'brother', 'brother-colloquial',
+      'daughter', 'daughter-colloquial', 'son', 'son-colloquial', 'grandmother', 'grandfather',
+      'paternal-aunt', 'paternal-aunt-colloquial', 'maternal-aunt', 'maternal-aunt-colloquial',
+      'paternal-uncle', 'paternal-uncle-colloquial', 'maternal-uncle', 'maternal-uncle-colloquial',
+      'son-in-law', 'daughter-in-law', 'wifes-father', 'wifes-mother',
+      'husbands-mother', 'husbands-mother-colloquial', 'husbands-father', 'husbands-father-colloquial',
+      'godfather', 'godfather-colloquial', 'godmother', 'godmother-colloquial',
+      'husband', 'wife', 'grandchild', 'parent',
+    ].sort());
+    const forward = vocabularyQuestions(settings('hy-ru', ['family', 'extended-family']), random);
+    for (const [hy, answer] of [
+      ['ամուսին', 'муж'], ['կին', 'жена; женщина'], ['թոռ', 'внук; внучка'], ['ծնող', 'родитель'],
+      ['հարս', 'невеста; невестка'], ['տղա', 'сын; мальчик'], ['աղջիկ', 'дочь; девочка; девушка'],
+    ]) expect(forward.find((q) => q.prompt === hy)?.answers).toEqual([answer]);
+    expect(selectedVocabularyEntries(['family', 'extended-family']).filter((entry) => entry.colloquial))
+      .toHaveLength(11);
+  });
+
+  it('принимает оба перевода «красивый» и исключает их из неправильных вариантов', () => {
+    const reverse = vocabularyQuestions(settings('ru-hy', ['qualities']), random);
+    const beautiful = reverse.find((q) => q.prompt === 'красивый')!;
+    expect(beautiful.answers).toEqual(['գեղեցիկ', 'սիրուն']);
+    for (const answer of beautiful.answers) expect(evaluateAnswer(beautiful, answer).good).toBe(true);
+    const forward = vocabularyQuestions(settings('hy-ru', ['qualities']), random);
+    for (const hy of beautiful.answers) {
+      const question = forward.find((q) => q.prompt === hy)!;
+      expect(question.answers).toEqual(['красивый']);
+      expect(question.options.filter((option) => option === 'красивый')).toHaveLength(1);
+    }
+    for (const meaning of ['правильный', 'прав'])
+      expect(reverse.find((q) => q.prompt === meaning)?.answers).toEqual(['ճիշտ']);
+  });
+
+  it('сохраняет армянскую вопросительную пунктуацию и пометки разговорных указательных слов', () => {
+    const ids = ['demonstratives-and-questions'];
+    const reverse = vocabularyQuestions(settings('ru-hy', ids), random);
+    expect(reverse.find((q) => q.prompt === 'кто')?.answers).toEqual(['ո՞վ']);
+    expect(reverse.find((q) => q.prompt === 'что')?.answers).toEqual(['ի՞նչ']);
+    for (const [meaning, standard, colloquial] of [['этот', 'այս', 'էս'], ['тот', 'այն', 'էն']]) {
+      const question = reverse.find((q) => q.prompt === meaning)!;
+      expect(question.answers).toEqual([standard, colloquial]);
+      expect(question.entries.find((entry) => entry.hy === colloquial)?.colloquial).toBe(true);
+      expect(question.entries.find((entry) => entry.hy === standard)?.colloquial).toBeUndefined();
+    }
   });
 });

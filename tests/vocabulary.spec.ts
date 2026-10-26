@@ -8,6 +8,16 @@ const directionLabels = { 'hy-ru': 'Армянский → русский', 'ru-
 const setEntries = (id: string) => vocabularyEntries.filter((entry) =>
   vocabularySets.find((set) => set.id === id)!.entryIds.includes(entry.id));
 
+const addedSets = [
+  ['professions', 'Профессии и занятия', 13],
+  ['qualities', 'Качества и свойства', 13],
+  ['home', 'Дом и повседневные предметы', 12],
+  ['study', 'Учёба и учебные принадлежности', 12],
+  ['demonstratives-and-questions', 'Указательные и вопросительные слова', 9],
+  ['family', 'Семья: близкие родственники', 15],
+  ['extended-family', 'Семья: другие родственники', 21],
+] as const;
+
 async function startWords(page: Page, title: string, direction: VocabularyDirection) {
   await page.goto('/words');
   await page.getByRole('button', { name: title, exact: true }).click();
@@ -40,6 +50,53 @@ async function answerWord(page: Page, direction: VocabularyDirection, wrong = fa
   return question;
 }
 
+for (const direction of ['hy-ru', 'ru-hy'] as const) {
+  for (const [id, title, count] of addedSets) {
+    test(`${title}, ${direction}: состав набора и полный проход`, async ({ page }) => {
+      await page.goto('/words');
+      const region = page.getByRole('region', { name: title, exact: true });
+      await region.getByText('Посмотреть слова', { exact: true }).click();
+      await expect(region.locator('.vocabulary-list li')).toHaveCount(count);
+      for (const entry of setEntries(id)) {
+        await expect(region.getByText(entry.hy, { exact: true })).toBeVisible();
+        await expect(region.locator('.vocabulary-list li').filter({
+          has: page.getByText(entry.hy, { exact: true }),
+        })).toContainText(entry.meanings.join('; '));
+      }
+      await startWords(page, title, direction);
+      const expected = direction === 'hy-ru' ? setEntries(id).map((entry) => entry.hy)
+        : [...new Set(setEntries(id).flatMap((entry) => entry.meanings))];
+      const seen: string[] = [];
+      while (await page.getByRole('region', { name: 'Тренировка слов' }).isVisible()) {
+        const question = await answerWord(page, direction);
+        seen.push(question.prompt);
+        await page.locator('.next-row button').click();
+      }
+      expect(seen.sort()).toEqual(expected.sort());
+      await expect(page.getByText(`Правильных ответов: ${seen.length} из ${seen.length}.`)).toBeVisible();
+    });
+  }
+
+  test(`новые наборы вместе, ${direction}: общий материал без повторов`, async ({ page }) => {
+    await page.goto('/words');
+    for (const [, title] of addedSets)
+      await page.getByRole('button', { name: title, exact: true }).click();
+    await page.getByRole('radio', { name: directionLabels[direction], exact: true }).check();
+    await page.getByRole('radio', { name: 'Все', exact: true }).check();
+    await page.getByRole('button', { name: /Начать тренировку/ }).click();
+    const entries = vocabularyEntries.filter((entry) => addedSets.some(([id]) => setEntries(id).includes(entry)));
+    const expected = direction === 'hy-ru' ? entries.map((entry) => entry.hy)
+      : [...new Set(entries.flatMap((entry) => entry.meanings))];
+    const seen: string[] = [];
+    while (await page.getByRole('region', { name: 'Тренировка слов' }).isVisible()) {
+      seen.push((await answerWord(page, direction)).prompt);
+      await page.locator('.next-row button').click();
+    }
+    expect(seen.sort()).toEqual(expected.sort());
+    await expect(page.getByText(`Правильных ответов: ${seen.length} из ${seen.length}.`)).toBeVisible();
+  });
+}
+
 test('наборы раскрываются независимо от выбора, настройки и счётчик сохраняются до перезагрузки', async ({ page }) => {
   await page.goto('/alphabet');
   await page.getByRole('link', { name: 'Слова', exact: true }).click();
@@ -63,9 +120,9 @@ test('наборы раскрываются независимо от выбор
   await expect(page.locator('.vocabulary-select[aria-pressed="true"]')).toHaveCount(vocabularySets.length);
   await page.getByRole('button', { name: 'Снять выбор', exact: true }).click();
   await expect(start).toBeDisabled();
-  await page.getByRole('button', { name: 'Семья', exact: true }).click();
+  await page.getByRole('button', { name: 'Семья: близкие родственники', exact: true }).click();
   await page.getByRole('radio', { name: directionLabels['ru-hy'], exact: true }).check();
-  await expect(start).toHaveText('Начать тренировку · 20');
+  await expect(start).toHaveText(`Начать тренировку · ${Math.min(20, new Set(setEntries('family').flatMap((entry) => entry.meanings)).size)}`);
   await page.getByRole('radio', { name: 'Все', exact: true }).check();
   const count = new Set(setEntries('family').flatMap((entry) => entry.meanings)).size;
   await expect(start).toHaveText(`Начать тренировку · ${count}`);
@@ -73,7 +130,7 @@ test('наборы раскрываются независимо от выбор
   await page.getByRole('link', { name: 'Слова', exact: true }).click();
   await expect(page.getByRole('radio', { name: directionLabels['ru-hy'], exact: true })).toBeChecked();
   await expect(page.getByRole('radio', { name: 'Все', exact: true })).toBeChecked();
-  await expect(page.getByRole('button', { name: 'Семья', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Семья: близкие родственники', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await page.reload();
   await expect(start).toBeDisabled();
   await expect(page.getByRole('radio', { name: directionLabels['hy-ru'], exact: true })).toBeChecked();
@@ -129,7 +186,7 @@ for (const direction of ['hy-ru', 'ru-hy'] as const) {
 }
 
 test('обратная тренировка принимает разговорные формы и показывает все правильные варианты', async ({ page }) => {
-  await startWords(page, 'Семья', 'ru-hy');
+  await startWords(page, 'Семья: близкие родственники', 'ru-hy');
   let alternatives = 0;
   while (await page.getByRole('region', { name: 'Тренировка слов' }).isVisible()) {
     const question = await currentWord(page, 'ru-hy');
@@ -204,7 +261,7 @@ for (const width of [390, 1280]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     for (const [direction, set, target] of [
       ['hy-ru', 'Приветствия', 'Շնորհակալություն'],
-      ['ru-hy', 'Семья', 'тётя (папина сестра)'],
+      ['ru-hy', 'Семья: другие родственники', 'тётя (папина сестра)'],
     ] as const) {
       await startWords(page, set, direction);
       while (await page.locator('.vocabulary-prompt').innerText() !== target) {
