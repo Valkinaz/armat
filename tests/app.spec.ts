@@ -395,6 +395,30 @@ for (const lessonId of ['definite-article', 'possessive-articles']) {
 }
 
 
+for (const mode of ['Выбрать форму', 'Собрать предложение']) {
+  test(`отсутствие артикля: объяснение и четыре примера — ${mode}`, async ({ page }) => {
+    await page.goto('/grammar/definite-article/blocks/exceptions');
+    const block = page.locator('.block').filter({ has: page.getByRole('heading', { name: 'Когда артикль не добавляется', exact: true }) });
+    await expect(block.locator('.block-rule')).toHaveText('Когда существительное в сказуемом обозначает профессию или национальность, определённый артикль обычно не используется.');
+    await expect(block.locator('.block-detail').filter({ hasText: 'Просто называем профессию' })).toContainText('Նա բժիշկ է։');
+    await expect(block.locator('.block-detail').filter({ hasText: 'Говорим о конкретном человеке' })).toContainText('Նա իմ բժիշկն է։');
+    await expect(block.locator('.block-detail').filter({ hasText: 'Некоторые особые формы' })).toHaveText('Некоторые особые формы множественного числа, например մարդիկ (люди) и կանայք (женщины), не получают определённый артикль.');
+    await expect(block.locator('.example-pair')).toHaveText([
+      'Նա բժիշկ է։', 'Այս տղամարդիկ ռուսներ են։', 'Այս օրիորդները ռուսներ են։', 'Նա իմ բժիշկն է։',
+    ]);
+    await block.getByRole('button', { name: mode, exact: true }).click();
+    const seen = new Set<string>();
+    for (let index = 0; index < 4; index++) {
+      seen.add(await page.locator('.grammar-translation').innerText());
+      await answerGrammar(page);
+      await expect(page.locator('.grammar-explanation')).not.toBeEmpty();
+      await nextGrammar(page);
+    }
+    expect(seen).toEqual(new Set(['Он врач.', 'Эти мужчины русские.', 'Эти девушки русские.', 'Он мой врач.']));
+    await expect(page.getByText('Правильных ответов: 4 из 4.')).toBeVisible();
+  });
+}
+
 for (const answer of ['եղբայրն', 'եղբայրը']) {
   test(`контекст артикля: принимает ${answer} и подсвечивает обе формы`, async ({ page }) => {
     await page.addInitScript(() => { Math.random = () => 0; });

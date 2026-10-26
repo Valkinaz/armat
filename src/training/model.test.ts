@@ -268,7 +268,27 @@ describe('уроки об артиклях', () => {
     expect(exceptions.detail).toContain('մարդիկ');
     expect(exceptions.detail).toContain('կանայք');
     expect(exceptions.detail).toContain('на другие контексты его не распространяем');
-    expect(exceptions.examples).toHaveLength(2);
+    expect(exceptions.examples).toHaveLength(4);
+  });
+  it('различает национальность без артикля и конкретного врача с артиклем в пятом блоке', () => {
+    const block = lessons[0].blocks.find((item) => item.id === 'exceptions')!;
+    expect(block.exercises!.filter((item) => item.type === 'choice')).toHaveLength(4);
+    expect(block.exercises!.filter((item) => item.type === 'build')).toHaveLength(4);
+    for (const [id, prompt, options] of [
+      ['article-exceptions-girls-nationality', 'Այս օրիորդները ___ են։', ['ռուսներ', 'ռուսները', 'ռուսներն', 'ռուսներիս']],
+      ['article-exceptions-my-doctor', 'Նա իմ ___ է։', ['բժիշկն', 'բժիշկը', 'բժիշկ', 'բժիշկս']],
+    ] as const) {
+      const choice = block.exercises!.find((item) => item.id === id + '-choice')!;
+      if (choice.type !== 'choice') throw new Error('Expected choice');
+      expect(choice.prompt).toBe(prompt);
+      expect(choice.options).toEqual(options);
+      expect(choice.answers).toEqual([options[0]]);
+      const question = prepareGrammarQuestion(choice);
+      for (const option of options)
+        expect(evaluateAnswer(question, option).good).toBe(option === options[0]);
+      const build = block.exercises!.find((item) => item.id === id + '-build')!;
+      expect(evaluateAnswer(prepareGrammarQuestion(build), choice.sentence).good).toBe(true);
+    }
   });
   it('не включает тему имени, фамилии и отчества', () => {
     const content = JSON.stringify(lessons);
