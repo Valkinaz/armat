@@ -493,6 +493,26 @@ h1 {
 .block-detail:has(+ .block-detail) {
   margin-bottom: 12px;
 }
+.theory-groups {
+  display: grid;
+  gap: 24px;
+  max-width: 780px;
+  margin-bottom: 20px;
+}
+.theory-group {
+  display: grid;
+  gap: 8px;
+}
+.theory-group h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: inherit;
+  font-weight: 600;
+  line-height: 1.55;
+}
+.theory-group .block-detail {
+  margin: 0;
+}
 .examples {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

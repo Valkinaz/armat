@@ -75,11 +75,16 @@ export interface BuildExercise extends ExerciseBase {
 
 export type SentenceExercise = ChoiceExercise | BuildExercise;
 
+export interface TheoryGroup {
+  title?: string;
+  text: string;
+}
+
 interface BlockBase {
   id: string;
   title: string;
   rule: string;
-  detail: string;
+  detail: string | TheoryGroup[];
 }
 
 export interface PluralBlock extends BlockBase {

@@ -403,6 +403,19 @@ for (const mode of ['Выбрать форму', 'Собрать предлож�
     await expect(block.locator('.block-detail').filter({ hasText: 'Просто называем профессию' })).toContainText('Նա բժիշկ է։');
     await expect(block.locator('.block-detail').filter({ hasText: 'Говорим о конкретном человеке' })).toContainText('Նա իմ բժիշկն է։');
     await expect(block.locator('.block-detail').filter({ hasText: 'Некоторые особые формы' })).toHaveText('Некоторые особые формы множественного числа, например մարդիկ (люди) и կանայք (женщины), не получают определённый артикль.');
+    const comparison = block.locator('.theory-group').filter({
+      has: page.getByRole('heading', { name: 'Сравни два предложения:', exact: true }),
+    });
+    await expect(comparison.locator('p')).toHaveText([
+      'Նա բժիշկ է։ — Он врач. Просто называем профессию.',
+      'Նա իմ բժիշկն է։ — Он мой врач. Говорим о конкретном человеке.',
+    ]);
+    await expect(block.locator('.theory-groups > .theory-group')).toHaveText([
+      /Сравни два предложения:/,
+      /^В сочетании իմ բժիշկն/,
+      /^Այս տղամարդիկ ռուսներ են։ — Эти мужчины русские\./,
+      /^Особые формы множественного числа/,
+    ]);
     await expect(block.locator('.example-pair')).toHaveText([
       'Նա բժիշկ է։', 'Այս տղամարդիկ ռուսներ են։', 'Այս օրիորդները ռուսներ են։', 'Նա իմ բժիշկն է։',
     ]);

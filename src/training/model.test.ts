@@ -265,7 +265,9 @@ describe('уроки об артиклях', () => {
       expect(evaluateAnswer(prepareGrammarQuestion(choice), wrong).good).toBe(false);
     }
     const exceptions = definite.blocks.find((block) => block.id === 'exceptions')!;
-    const detail = exceptions.detail.replaceAll('**', '');
+    const detail = (typeof exceptions.detail === 'string'
+      ? exceptions.detail
+      : exceptions.detail.map((group) => group.text).join('\n\n')).replaceAll('**', '');
     expect(detail).toContain('Некоторые особые формы множественного числа, например մարդիկ (люди) и կանայք (женщины), не получают определённый артикль.');
     expect(detail).toContain('В предложении «Այս տղամարդիկ ռուսներ են։» слово տղամարդիկ употребляется без определённого артикля.');
     expect(exceptions.examples).toHaveLength(4);

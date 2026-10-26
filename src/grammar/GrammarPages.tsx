@@ -105,7 +105,16 @@ function LessonBlockView({
         </div>
       </div>
       <Explanation text={block.rule} className="block-rule" />
-      {block.detail.includes('**') ? (
+      {Array.isArray(block.detail) ? (
+        <div className="theory-groups">
+          {block.detail.map((group, groupIndex) => (
+            <div className="theory-group" key={groupIndex}>
+              {group.title && <h4>{group.title}</h4>}
+              <Explanation text={group.text} className="block-detail" />
+            </div>
+          ))}
+        </div>
+      ) : block.detail.includes('**') ? (
         <Explanation text={block.detail} className="block-detail" />
       ) : (
         <p className="block-detail">{block.detail}</p>

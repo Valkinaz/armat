@@ -87,7 +87,10 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
       check(
         hasText(block.title) &&
           hasText(block.rule) &&
-          hasText(block.detail) &&
+          (hasText(block.detail) ||
+            (Array.isArray(block.detail) && block.detail.length > 0 &&
+              block.detail.every((group) => group && hasText(group.text) &&
+                (group.title === undefined || hasText(group.title))))) &&
           block.examples?.length > 0,
         `Пустой блок ${block.id}.`,
       );
