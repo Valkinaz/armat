@@ -164,6 +164,9 @@ export function Training({ session }: { session: Session }) {
               }
               lang={wordQuestion?.direction === 'ru-hy' ? 'ru' : 'hy'}
             >
+              {question.kind === 'choice' && question.exercise.cue && (
+                <span className="grammar-cue">{question.exercise.cue} → </span>
+              )}
               {prompt}
             </div>
           )

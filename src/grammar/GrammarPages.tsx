@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router';
 import { grammarLessons } from '../data/grammar-lessons.ts';
-import type { PluralExample, SentenceExample, LessonBlock } from '../data/types.ts';
+import type { Inflection, PluralExample, SentenceExample, LessonBlock } from '../data/types.ts';
 import { MaterialView, NotFound } from '../app/MaterialView.tsx';
 import { useStartPractice } from '../app/useStartPractice.ts';
 import { blockItems, grammarQuestions, mixedBlockItems, shuffled } from '../training/model.ts';
@@ -60,6 +60,35 @@ function Example({ item }: { item: PluralExample | SentenceExample }) {
   );
 }
 
+function InflectionTable({ forms }: { forms: Inflection[] }) {
+  const hasPlural = forms.some((form) => form.singular);
+  return (
+    <div className="forms-wrap">
+      <table className="forms-table" aria-label="Формы родительного падежа">
+        <thead>
+          <tr>
+            <th scope="col">{hasPlural ? 'Единственное число' : 'Начальная форма'}</th>
+            {hasPlural && <th scope="col">Множественное число</th>}
+            <th scope="col">Родительный падеж</th>
+          </tr>
+        </thead>
+        <tbody>
+          {forms.map(({ singular, initial, answers, ru }) => (
+            <tr key={initial}>
+              <td>
+                <span className="armenian" lang="hy">{singular ?? initial}</span>
+                <span className="example-ru">{ru}</span>
+              </td>
+              {hasPlural && <td className="armenian" lang="hy">{initial}</td>}
+              <td className="armenian" lang="hy">{answers.join(' / ')}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function LessonBlockView({
   block,
   index,
@@ -74,7 +103,9 @@ function LessonBlockView({
   const startPractice = useStartPractice();
   const modes = block.exercises ? (['choice', 'build'] as const) : (['choice'] as const);
   const forms = block.exercises ? block.examples.filter((item) => item.person) : [];
-  const examples = block.examples.filter((item) => !('person' in item && item.person));
+  const examples = block.examples.filter((item) =>
+    !('sentence' in item && (item.person || (item.choiceOnly && item.sentence === item.form))),
+  );
   return (
     <section className="block" aria-labelledby={'block-' + block.id}>
       <div className="block-top">
@@ -111,6 +142,7 @@ function LessonBlockView({
             <div className="theory-group" key={groupIndex}>
               {group.title && <h4>{group.title}</h4>}
               <Explanation text={group.text} className="block-detail" />
+              {group.forms && <InflectionTable forms={group.forms} />}
             </div>
           ))}
         </div>

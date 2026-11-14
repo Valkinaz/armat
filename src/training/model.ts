@@ -63,14 +63,38 @@ export function blockItems(
   mode: 'choice' | 'build' = 'choice',
   random: Random = Math.random,
 ): GrammarItem[] {
+  if (!block.exercises) return shuffled(block.examples, random).slice(0, 6);
+  const candidates = shuffled(block.exercises.filter((item) => item.type === mode), random);
+  if (!candidates.some((item) => item.practiceGroup)) return candidates.slice(0, 6);
+  const firstByGroup = new Map<string, SentenceExercise>();
+  for (const item of candidates) {
+    if (item.practiceGroup && !firstByGroup.has(item.practiceGroup)) {
+      firstByGroup.set(item.practiceGroup, item);
+    }
+  }
+  const first = [...firstByGroup.values()];
   return shuffled<GrammarItem>(
-    block.exercises ? block.exercises.filter((item) => item.type === mode) : block.examples,
+    [...first, ...candidates.filter((item) => !first.includes(item))].slice(0, 6),
     random,
-  ).slice(0, 6);
+  );
 }
 
 export function mixedBlockItems(block: LessonBlock, random: Random = Math.random): GrammarItem[] {
   if (!block.exercises) return shuffled(block.examples, random).slice(0, 3);
+  if (block.exercises.some((item) => item.practiceGroup)) {
+    const candidates = shuffled(block.exercises, random);
+    const picked: SentenceExercise[] = [];
+    for (const mode of ['build', 'choice', undefined] as const) {
+      const available = candidates.filter((item) =>
+        (!mode || item.type === mode) && !picked.some((other) => other.exampleId === item.exampleId),
+      );
+      const next = available.find((item) =>
+        !picked.some((other) => other.practiceGroup === item.practiceGroup),
+      ) ?? available[0];
+      if (next) picked.push(next);
+    }
+    return picked;
+  }
   const picked: SentenceExercise[] = [];
   for (const type of ['choice', 'build']) {
     const item = shuffled(

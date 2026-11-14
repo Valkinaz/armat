@@ -28,9 +28,17 @@ async function grammarQuestion(page: Page) {
       wrong: '',
     };
   }
-  const prompt = await page.locator('.grammar-prompt').innerText();
+  const { cue, prompt } = await page.locator('.grammar-prompt').evaluate((element) => {
+    const prefix = element.querySelector('.grammar-cue')?.textContent ?? '';
+    return {
+      cue: prefix ? prefix.slice(0, -3) : undefined,
+      prompt: (element.textContent ?? '').slice(prefix.length),
+    };
+  });
   const ru = await page.locator('.grammar-translation').innerText();
-  const exercise = exercises.find((item) => item.type === 'choice' && item.prompt === prompt && item.ru === ru);
+  const exercise = exercises.find((item) =>
+    item.type === 'choice' && item.prompt === prompt && item.cue === cue && item.ru === ru,
+  );
   if (exercise?.type === 'choice') {
     return {
       kind: 'choice' as const,
@@ -82,23 +90,25 @@ async function nextGrammar(page: Page) {
 
 test('прямые ссылки открывают и восстанавливают материалы после обновления', async ({ page }) => {
   const routes = [
-    { path: '/', heading: 'Выбери буквы для тренировки' },
-    { path: '/alphabet', heading: 'Выбери буквы для тренировки' },
-    { path: '/grammar', heading: 'Уроки армянского языка' },
-    ...grammarLessons.map((lesson) => ({ path: '/grammar/' + lesson.id, heading: lesson.title })),
+    { path: '/', heading: 'Выбери буквы для тренировки', level: 1 },
+    { path: '/alphabet', heading: 'Выбери буквы для тренировки', level: 1 },
+    { path: '/grammar', heading: 'Уроки армянского языка', level: 1 },
+    ...grammarLessons.map((lesson) => ({ path: '/grammar/' + lesson.id, heading: lesson.title, level: 1 })),
     ...grammarLessons.flatMap((lesson) =>
       lesson.blocks.map((block) => ({
         path: '/grammar/' + lesson.id + '/blocks/' + block.id,
         heading: block.title,
+        level: 3,
       })),
     ),
   ];
   for (const route of routes) {
     const response = await page.goto(route.path);
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole('heading', { name: route.heading, exact: true })).toBeFocused();
+    const heading = page.getByRole('heading', { name: route.heading, level: route.level, exact: true });
+    await expect(heading).toBeFocused();
     await page.reload();
-    await expect(page.getByRole('heading', { name: route.heading, exact: true })).toBeFocused();
+    await expect(heading).toBeFocused();
     expect(new URL(page.url()).hash).toBe('');
   }
 });
@@ -343,6 +353,7 @@ for (const width of [390, 1280]) {
       [lessonPath, 'lesson'],
       ['/grammar/definite-article', 'definite-article'],
       ['/grammar/possessive-articles', 'possessive-articles'],
+      ['/grammar/genitive-case', 'genitive-case'],
     ]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
@@ -364,6 +375,57 @@ for (const width of [390, 1280]) {
     expect(errors).toEqual([]);
   });
 }
+
+test('родительный падеж отображается пятым и доступен по ссылкам на блоки', async ({ page }) => {
+  await page.goto('/grammar');
+  const tile = page.locator('.lesson-tile').nth(4);
+  await expect(tile).toContainText('Урок 5');
+  await expect(tile).toContainText('Родительный падеж');
+  await tile.click();
+  const blocks = page.locator('.block');
+  await expect(blocks).toHaveCount(8);
+  for (const alternatives of ['ժամվա / ժամի', 'ամսվա / ամսի', 'ծննդյան / ծնունդի']) {
+    await expect(page.getByRole('cell', { name: alternatives, exact: true })).toBeVisible();
+  }
+  for (const block of await blocks.all()) {
+    const heading = block.getByRole('heading', { level: 3 });
+    const href = await heading.getByRole('link').getAttribute('href');
+    expect(href).toMatch(/^\/grammar\/genitive-case\/blocks\//);
+    await page.goto(href!);
+    await expect(heading).toBeFocused();
+    for (const mode of ['Выбрать форму', 'Собрать предложение']) {
+      await block.getByRole('button', { name: mode, exact: true }).click();
+      const question = await answerGrammar(page);
+      expect(question.kind).toBe(mode === 'Выбрать форму' ? 'choice' : 'build');
+      if (question.kind === 'build') expect(question.words.at(-1)).toMatch(/։$/);
+      else await expect(page.locator('.grammar-cue')).toBeVisible();
+      await page.getByRole('link', { name: '← К уроку' }).click();
+      await expect(page).toHaveURL(href!);
+    }
+  }
+});
+
+test('родительный падеж: смешанная тренировка и повтор ошибок обоих форматов', async ({ page }) => {
+  await page.goto('/grammar/genitive-case');
+  await page.getByRole('button', { name: 'Смешанная тренировка · 24 вопросов' }).click();
+  const missed = new Map<string, string>();
+  for (let index = 0; index < 24; index++) {
+    const question = await grammarQuestion(page);
+    const wrong = !missed.has(question.kind);
+    if (wrong) missed.set(question.kind, question.key);
+    await answerGrammar(page, wrong);
+    await nextGrammar(page);
+  }
+  await expect(page.getByText('Правильных ответов: 22 из 24.')).toBeVisible();
+  await page.getByRole('button', { name: 'Повторить ошибки' }).click();
+  for (let index = 0; index < 2; index++) {
+    const question = await answerGrammar(page);
+    expect(question.key).toBe(missed.get(question.kind));
+    missed.delete(question.kind);
+    await nextGrammar(page);
+  }
+  await expect(page.getByText('Правильных ответов: 2 из 2.')).toBeVisible();
+});
 
 
 for (const mode of ['Выбрать форму', 'Собрать предложение']) {

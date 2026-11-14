@@ -120,6 +120,74 @@ describe('подготовка вопросов', () => {
   });
 });
 
+describe('родительный падеж', () => {
+  const lesson = grammarLessons.find((item) => item.id === 'genitive-case')!;
+  const blocks = lesson.blocks as SentenceBlock[];
+
+  it('сохраняет подправила и оба формата при разных выборках', () => {
+    expect(blocks).toHaveLength(8);
+    for (let seed = 1; seed <= 25; seed++) {
+      let value = seed;
+      const random = () => {
+        value = (value * 16807) % 2147483647;
+        return value / 2147483647;
+      };
+      for (const block of blocks) {
+        const groups = (items: ReturnType<typeof blockItems>) =>
+          new Set(items.map((item) => 'type' in item && item.practiceGroup));
+        for (const mode of ['choice', 'build'] as const) {
+          const items = blockItems(block, mode, random);
+          expect(items.length).toBeLessThanOrEqual(6);
+          expect(items.every((item) => 'type' in item && item.type === mode)).toBe(true);
+          expect(groups(items)).toEqual(groups(block.exercises.filter((item) => item.type === mode)));
+        }
+        const mixed = mixedBlockItems(block, random).filter((item) => 'type' in item);
+        expect(mixed).toHaveLength(3);
+        expect(new Set(mixed.map((item) => item.type))).toEqual(new Set(['choice', 'build']));
+        expect(new Set(mixed.map((item) => item.exampleId)).size).toBe(3);
+        expect(groups(mixed)).toEqual(groups(block.exercises));
+      }
+    }
+  });
+
+  it('принимает обе согласованные формы и сохраняет исходные задания при повторе ошибок', () => {
+    const exercises = blocks.flatMap((block) => block.exercises);
+    const alternatives = [
+      ['ժամվա', 'ժամի'],
+      ['ամսվա', 'ամսի'],
+      ['ծննդյան', 'ծնունդի'],
+    ];
+    for (const pair of alternatives) {
+      const choices = exercises.filter((item) =>
+        item.type === 'choice' && item.answers.includes(pair[0]),
+      );
+      expect(choices.length).toBeGreaterThan(0);
+      for (const choice of choices) {
+        if (choice.type !== 'choice') throw new Error('Expected choice');
+        const question = prepareGrammarQuestion(choice, constantRandom);
+        expect(choice.answers).toEqual(pair);
+        for (const answer of pair) {
+          expect(choice.options).toContain(answer);
+          expect(evaluateAnswer(question, answer)).toMatchObject({
+            good: true,
+            sentence: choice.prompt.replace('___', answer),
+          });
+        }
+        expect(evaluateAnswer(question, choice.options.find((item) => !pair.includes(item))!).good).toBe(false);
+      }
+    }
+    const choice = exercises.find((item) =>
+      item.type === 'choice' && item.answers.includes('ծնունդի') && item.prompt !== '___',
+    )!;
+    const build = exercises.find((item) => item.exampleId === choice.exampleId && item.type === 'build')!;
+    const original = grammarQuestions([choice, build], constantRandom);
+    const retried = retryQuestions(original, constantRandom);
+    expect(retried).toHaveLength(2);
+    expect(retried.find((item) => item.kind === 'choice')).toMatchObject({ exercise: choice });
+    expect(retried.find((item) => item.kind === 'build')).toMatchObject({ exercise: build });
+  });
+});
+
 describe('состояние занятия', () => {
   it('не позволяет перейти до ответа или начислить один ответ повторно', () => {
     const question = alphabetQuestions([alphabet[0]], alphabet)[0];

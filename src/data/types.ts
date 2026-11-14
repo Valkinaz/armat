@@ -42,11 +42,14 @@ export interface SentenceExample {
   note: string;
   colloquial?: string;
   verbIndex?: number;
+  choiceOnly?: boolean;
+  practiceGroup?: string;
   choice?: {
     wordIndex: number;
     answers: string[];
     options: string[];
     instruction: string;
+    cue?: string;
   };
 }
 
@@ -57,11 +60,13 @@ interface ExerciseBase {
   ru: string;
   note: string;
   colloquial?: string;
+  practiceGroup?: string;
 }
 
 export interface ChoiceExercise extends ExerciseBase {
   type: 'choice';
   instruction?: string;
+  cue?: string;
   prompt: string;
   answers: string[];
   options: string[];
@@ -75,9 +80,17 @@ export interface BuildExercise extends ExerciseBase {
 
 export type SentenceExercise = ChoiceExercise | BuildExercise;
 
+export interface Inflection {
+  initial: string;
+  answers: string[];
+  ru: string;
+  singular?: string;
+}
+
 export interface TheoryGroup {
   title?: string;
   text: string;
+  forms?: Inflection[];
 }
 
 interface BlockBase {
