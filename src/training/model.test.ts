@@ -124,6 +124,24 @@ describe('родительный падеж', () => {
   const lesson = grammarLessons.find((item) => item.id === 'genitive-case')!;
   const blocks = lesson.blocks as SentenceBlock[];
 
+  it.each([
+    ['հարևան', ['հարևանի', 'հարևան', 'հարևանը', 'հարևանով']],
+    ['հեռախոս', ['հեռախոսի', 'հեռախոս', 'հեռախոսը', 'հեռախոսով']],
+    ['այգի', ['այգու', 'այգի', 'այգին', 'այգուց']],
+  ] as const)('использует формы слова %s во всех его заданиях', (initial, options) => {
+    const choices = blocks.flatMap((block) => block.exercises)
+      .filter((item) => item.type === 'choice')
+      .filter((item) => item.cue === initial);
+    expect(choices.some((item) => item.prompt === '___')).toBe(true);
+    expect(choices.some((item) => item.prompt !== '___')).toBe(true);
+    for (const choice of choices) {
+      const expected = choice.answers[0];
+      expect(choice.options).toHaveLength(4);
+      expect(choice.options.map((option) => option.toLowerCase())).toEqual(options);
+      expect(choice.options.every((option) => /^[Ա-Ֆ]/.test(option) === /^[Ա-Ֆ]/.test(expected))).toBe(true);
+    }
+  });
+
   it('сохраняет подправила и оба формата при разных выборках', () => {
     expect(blocks).toHaveLength(8);
     for (let seed = 1; seed <= 25; seed++) {

@@ -405,6 +405,26 @@ test('родительный падеж отображается пятым и �
   }
 });
 
+test('родительный падеж: варианты одного слова в отдельном задании и в предложении', async ({ page }) => {
+  await page.addInitScript(() => { Math.random = () => 0.8; });
+  await page.goto('/grammar/genitive-case/blocks/basic');
+  await page.getByRole('region', { name: 'Основное правило', exact: true })
+    .getByRole('button', { name: 'Выбрать форму', exact: true }).click();
+
+  await expect(page.locator('.grammar-prompt')).toHaveText('հարևան → ___');
+  const options = page.locator('.options').getByRole('button');
+  expect((await options.allTextContents()).sort()).toEqual(['հարևան', 'հարևանի', 'հարևանը', 'հարևանով'].sort());
+  await options.getByText('հարևանի', { exact: true }).click();
+  await expect(page.locator('.feedback')).toHaveText('Верно!');
+  await nextGrammar(page);
+
+  await expect(page.locator('.grammar-prompt')).toHaveText('մազեր → Իմ ___ գույնը սև է։');
+  expect((await options.allTextContents()).sort()).toEqual(['մազեր', 'մազերի', 'մազերը', 'մազերով'].sort());
+  await options.getByText('մազերով', { exact: true }).click();
+  await expect(page.locator('.feedback')).toHaveClass(/bad/);
+  await expect(page.locator('.grammar-answer')).toHaveText('Իմ մազերի գույնը սև է։');
+});
+
 test('родительный падеж: смешанная тренировка и повтор ошибок обоих форматов', async ({ page }) => {
   await page.goto('/grammar/genitive-case');
   await page.getByRole('button', { name: 'Смешанная тренировка · 24 вопросов' }).click();
