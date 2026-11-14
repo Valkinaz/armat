@@ -26,6 +26,7 @@ export function createSentenceLesson(source: SentenceLessonSource): Lesson {
           ru: example.ru,
           note: example.note,
           colloquial: example.colloquial,
+          ...(example.practiceGroup && { practiceGroup: example.practiceGroup }),
         };
         const exercises: SentenceExercise[] = [
           {
@@ -36,9 +37,11 @@ export function createSentenceLesson(source: SentenceLessonSource): Lesson {
             answers,
             options: example.choice?.options ?? [...answers, ...distractors.slice(0, 4 - answers.length)],
             instruction: example.choice?.instruction,
+            ...(example.choice?.cue && { cue: example.choice.cue }),
           },
-          { ...shared, id: example.id + '-build', type: 'build', words },
         ];
+        if (example.choiceOnly) return exercises;
+        exercises.push({ ...shared, id: example.id + '-build', type: 'build', words });
         if (example.colloquial) {
           exercises.push({
             ...shared,

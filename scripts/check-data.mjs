@@ -30,6 +30,11 @@ for (const [index, letter] of alphabet.entries()) {
 }
 
 const hasText = (value) => typeof value === 'string' && value.trim().length > 0;
+const validInflection = (form) =>
+  form && hasText(form.initial) && hasText(form.ru) &&
+  (form.singular === undefined || hasText(form.singular)) &&
+  Array.isArray(form.answers) && form.answers.length > 0 &&
+  form.answers.every(hasText) && new Set(form.answers).size === form.answers.length;
 const check = (condition, message) => {
   if (!condition) errors.push(message);
 };
@@ -79,6 +84,9 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
       exampleIds = new Set(),
       exerciseIds = new Set();
     for (const block of lesson.blocks ?? []) {
+      const inflections = Array.isArray(block.detail)
+        ? block.detail.flatMap((group) => group.forms ?? [])
+        : [];
       check(
         hasText(block.id) && !blockIds.has(block.id),
         `Некорректный или повторный id блока в ${lesson.id}.`,
@@ -90,7 +98,9 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
           (hasText(block.detail) ||
             (Array.isArray(block.detail) && block.detail.length > 0 &&
               block.detail.every((group) => group && hasText(group.text) &&
-                (group.title === undefined || hasText(group.title))))) &&
+                (group.title === undefined || hasText(group.title)) &&
+                (group.forms === undefined || (Array.isArray(group.forms) && group.forms.length > 0 &&
+                  group.forms.every(validInflection)))))) &&
           block.examples?.length > 0,
         `Пустой блок ${block.id}.`,
       );
@@ -122,6 +132,29 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
           example.colloquial === undefined || hasText(example.colloquial),
           `Пустой разговорный вариант в ${example.id}.`,
         );
+        check(
+          example.choiceOnly === undefined || typeof example.choiceOnly === 'boolean',
+          `Некорректная настройка выбора формы в ${example.id}.`,
+        );
+        check(
+          example.practiceGroup === undefined || hasText(example.practiceGroup),
+          `Некорректная группа практики в ${example.id}.`,
+        );
+        if (example.choice?.cue !== undefined) {
+          check(hasText(example.choice.cue), `Пустая начальная форма в ${example.id}.`);
+          const entry = inflections.find((form) => form.initial === example.choice.cue);
+          if (example.sentence === example.form)
+            check(
+              example.choiceOnly && entry?.ru === example.ru,
+              `Начальная форма или перевод в ${example.id} расходятся с таблицей.`,
+            );
+          if (entry && validInflection(entry) && Array.isArray(example.choice.answers))
+            check(
+              JSON.stringify(entry.answers.map((form) => form.toLowerCase())) ===
+                JSON.stringify(example.choice.answers.map((form) => form.toLowerCase())),
+              `Ответы в ${example.id} расходятся с таблицей.`,
+            );
+        }
         const words = (example.sentence || '').split(' '),
           index = example.choice?.wordIndex ?? example.verbIndex ?? words.length - 1;
         check(
@@ -132,11 +165,10 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
           block.exercises.some((item) => item.exampleId === example.id && item.type === 'choice'),
           `Нет выбора формы для ${example.id}.`,
         );
+        const builds = block.exercises.filter((item) => item.exampleId === example.id && item.type === 'build');
         check(
-          block.exercises.some(
-            (item) => item.exampleId === example.id && item.type === 'build' && !item.variant,
-          ),
-          `Нет сборки основного образца для ${example.id}.`,
+          example.choiceOnly ? builds.length === 0 : builds.some((item) => !item.variant),
+          `Набор заданий на сборку расходится с настройкой примера ${example.id}.`,
         );
         if (example.colloquial)
           check(
@@ -159,8 +191,9 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
         check(
           item.ru === example.ru &&
             item.note === example.note &&
-            item.colloquial === example.colloquial,
-          `${context}: перевод, пояснение или разговорный пример расходятся с источником.`,
+            item.colloquial === example.colloquial &&
+            item.practiceGroup === example.practiceGroup,
+          `${context}: перевод, пояснение, разговорный пример или группа практики расходятся с источником.`,
         );
         check(
           item.variant === undefined || item.variant === 'colloquial',
@@ -190,6 +223,7 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
           if (example.choice) {
             check(hasText(example.choice.instruction) && item.instruction === example.choice.instruction,
               `${context}: нет инструкции или она расходится с источником.`);
+            check(item.cue === example.choice.cue, `${context}: начальная форма расходится с источником.`);
             check(Array.isArray(accepted) && accepted.length > 0 && accepted.every(hasText) &&
               new Set(accepted).size === accepted.length && accepted.includes(example.form),
               `${context}: неверные допустимые ответы.`);
