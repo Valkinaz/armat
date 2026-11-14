@@ -128,6 +128,9 @@ describe('родительный падеж', () => {
     ['հարևան', ['հարևանի', 'հարևան', 'հարևանը', 'հարևանով']],
     ['հեռախոս', ['հեռախոսի', 'հեռախոս', 'հեռախոսը', 'հեռախոսով']],
     ['այգի', ['այգու', 'այգի', 'այգին', 'այգուց']],
+    ['այսօր', ['այսօրվա', 'այսօրվանից', 'այսօրվանով', 'այսօր']],
+    ['երեկ', ['երեկվա', 'երեկվանից', 'երեկվանով', 'երեկ']],
+    ['վաղը', ['վաղվա', 'վաղվանից', 'վաղվանով', 'վաղը']],
   ] as const)('использует формы слова %s во всех его заданиях', (initial, options) => {
     const choices = blocks.flatMap((block) => block.exercises)
       .filter((item) => item.type === 'choice')
@@ -136,6 +139,7 @@ describe('родительный падеж', () => {
     expect(choices.some((item) => item.prompt !== '___')).toBe(true);
     for (const choice of choices) {
       const expected = choice.answers[0];
+      expect(choice.answers.map((answer) => answer.toLowerCase())).toEqual([options[0]]);
       expect(choice.options).toHaveLength(4);
       expect(choice.options.map((option) => option.toLowerCase())).toEqual(options);
       expect(choice.options.every((option) => /^[Ա-Ֆ]/.test(option) === /^[Ա-Ֆ]/.test(expected))).toBe(true);
