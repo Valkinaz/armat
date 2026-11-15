@@ -8,6 +8,7 @@ type FormSource = [
   distractors: [string, string] | [string, string, string],
   note?: string,
   singular?: string,
+  practiceRu?: string,
 ];
 
 type ExampleSource = [initial: string, pattern: string, ru: string];
@@ -25,11 +26,11 @@ interface GroupSource {
 
 type BlockSource = SentenceLessonSource['blocks'][number];
 
-function parseForm([initial, genitive, ru, distractors, note, singular]: FormSource): Inflection & {
+function parseForm([initial, genitive, ru, distractors, note, singular, practiceRu]: FormSource): Inflection & {
   distractors: string[];
   note?: string;
 } {
-  return { initial, answers: genitive.split(' / '), ru, distractors, note, singular };
+  return { initial, answers: genitive.split(' / '), ru, distractors, note, singular, practiceRu };
 }
 
 function block(
@@ -85,8 +86,8 @@ function block(
       }
 
       return [
-        ...table.map(({ initial, ru }, position) =>
-          example(`form-${position + 1}`, initial, '___', ru, false),
+        ...table.map(({ initial, ru, practiceRu }, position) =>
+          example(`form-${position + 1}`, initial, '___', practiceRu ?? ru, false),
         ),
         ...(group.phrases ?? []).map(([initial, pattern, ru], position) =>
           example(`phrase-${position + 1}`, initial, pattern, ru, false),
@@ -169,9 +170,9 @@ const source: SentenceLessonSource = {
         text: '**Обычно сначала образуется множественное число на -եր или -ներ, затем добавляется -ի.** Далее рассмотрим исключения.',
         note: 'Окончание -ի добавляется к уже готовой форме множественного числа.',
         forms: [
-          ['հարևաններ', 'հարևանների', 'сосед', ['հարևաններ', 'հարևանները', 'հարևաններով'], undefined, 'հարևան'],
-          ['աշակերտներ', 'աշակերտների', 'ученик', ['աշակերտներ', 'աշակերտները', 'աշակերտներով'], undefined, 'աշակերտ'],
-          ['մայրեր', 'մայրերի', 'мать', ['մայրեր', 'մայրերը', 'մայրերով'], undefined, 'մայր'],
+          ['հարևաններ', 'հարևանների', 'сосед', ['հարևաններ', 'հարևանները', 'հարևաններով'], undefined, 'հարևան', 'соседи'],
+          ['աշակերտներ', 'աշակերտների', 'ученик', ['աշակերտներ', 'աշակերտները', 'աշակերտներով'], undefined, 'աշակերտ', 'ученики'],
+          ['մայրեր', 'մայրերի', 'мать', ['մայրեր', 'մայրերը', 'մայրերով'], undefined, 'մայր', 'матери'],
         ],
         extraForms: [['մազեր', 'մազերի', 'волосы', ['մազեր', 'մազերը', 'մազերով']]],
         phrases: [['մազեր', '___ գույնը', 'цвет волос']],

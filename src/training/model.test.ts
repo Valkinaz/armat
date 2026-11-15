@@ -123,6 +123,46 @@ describe('подготовка вопросов', () => {
 describe('родительный падеж', () => {
   const lesson = grammarLessons.find((item) => item.id === 'genitive-case')!;
   const blocks = lesson.blocks as SentenceBlock[];
+  const basic = blocks.find((block) => block.id === 'basic')!;
+
+  it.each([
+    ['հարևաններ', 'հարևան', 'հարևանների', 'сосед', 'соседи'],
+    ['աշակերտներ', 'աշակերտ', 'աշակերտների', 'ученик', 'ученики'],
+    ['մայրեր', 'մայր', 'մայրերի', 'мать', 'матери'],
+  ])('разделяет переводы таблицы и упражнения для %s', (initial, singular, answer, ru, practiceRu) => {
+    if (typeof basic.detail === 'string') throw new Error('Expected theory groups');
+    const entry = basic.detail.flatMap((group) => group.forms ?? [])
+      .find((form) => form.initial === initial);
+    expect(entry).toMatchObject({ initial, singular, ru, answers: [answer] });
+    const exercise = basic.exercises.find((item) =>
+      item.type === 'choice' && item.prompt === '___' && item.cue === initial,
+    );
+    expect(exercise).toMatchObject({ cue: initial, ru: practiceRu, answers: [answer], sentence: answer });
+  });
+
+  it('сохраняет перевод формы без отдельной подсказки', () => {
+    if (typeof basic.detail === 'string') throw new Error('Expected theory groups');
+    const entry = basic.detail.flatMap((group) => group.forms ?? [])
+      .find((form) => form.initial === 'Արամ');
+    expect(entry).toMatchObject({ initial: 'Արամ', ru: 'Арам' });
+    expect(entry?.practiceRu).toBeUndefined();
+    const exercise = basic.exercises.find((item) =>
+      item.type === 'choice' && item.prompt === '___' && item.cue === 'Արամ',
+    );
+    expect(exercise).toMatchObject({ ru: 'Арам', answers: ['Արամի'] });
+  });
+
+  it('сохраняет собственный перевод контекстного задания', () => {
+    const exercise = basic.exercises.find((item) =>
+      item.type === 'choice' && item.sentence === 'Իմ մազերի գույնը սև է։',
+    );
+    expect(exercise).toMatchObject({
+      cue: 'մազեր',
+      prompt: 'Իմ ___ գույնը սև է։',
+      answers: ['մազերի'],
+      ru: 'Цвет моих волос чёрный.',
+    });
+  });
 
   it.each([
     ['հարևան', ['հարևանի', 'հարևան', 'հարևանը', 'հարևանով']],
