@@ -33,6 +33,7 @@ const hasText = (value) => typeof value === 'string' && value.trim().length > 0;
 const validInflection = (form) =>
   form && hasText(form.initial) && hasText(form.ru) &&
   (form.singular === undefined || hasText(form.singular)) &&
+  (form.practiceRu === undefined || hasText(form.practiceRu)) &&
   Array.isArray(form.answers) && form.answers.length > 0 &&
   form.answers.every(hasText) && new Set(form.answers).size === form.answers.length;
 const check = (condition, message) => {
@@ -145,7 +146,7 @@ if (!Array.isArray(lessons) || lessons.length === 0) {
           const entry = inflections.find((form) => form.initial === example.choice.cue);
           if (example.sentence === example.form)
             check(
-              example.choiceOnly && entry?.ru === example.ru,
+              entry && example.choiceOnly && (entry.practiceRu ?? entry.ru) === example.ru,
               `Начальная форма или перевод в ${example.id} расходятся с таблицей.`,
             );
           if (entry && validInflection(entry) && Array.isArray(example.choice.answers))

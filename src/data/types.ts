@@ -85,6 +85,7 @@ export interface Inflection {
   answers: string[];
   ru: string;
   singular?: string;
+  practiceRu?: string;
 }
 
 export interface TheoryGroup {
