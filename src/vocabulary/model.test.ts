@@ -13,7 +13,10 @@ describe('словарные вопросы', () => {
   for (const direction of ['hy-ru', 'ru-hy'] as const) {
     it(`${direction}: полный проход охватывает выбранный материал без повторов и изменения источника`, () => {
       const before = structuredClone({ vocabularyEntries, vocabularySets });
-      const setup = settings(direction, ['weekdays', 'family']);
+      const setup = settings(direction, [
+        'weekdays', 'time-and-calendar', 'study', 'body-parts', 'food', 'animals',
+        'seasons-and-weather', 'nature',
+      ]);
       const entries = selectedVocabularyEntries(setup.setIds);
       const questions = vocabularyQuestions(setup, random);
       const expected = direction === 'hy-ru' ? entries.map((entry) => entry.hy)
@@ -59,12 +62,15 @@ describe('словарные вопросы', () => {
   }
 
   it('сохраняет оба значения շաբաթ и задаёт их отдельно в обратном направлении', () => {
-    const forward = vocabularyQuestions(settings('hy-ru', ['weekdays']), random);
+    const ids = ['weekdays', 'time-and-calendar'];
+    const forward = vocabularyQuestions(settings('hy-ru', ids), random);
     expect(forward.filter((question) => question.prompt === 'շաբաթ')).toHaveLength(1);
     expect(forward.find((question) => question.prompt === 'շաբաթ')?.answers).toEqual(['неделя; суббота']);
-    const reverse = vocabularyQuestions(settings('ru-hy', ['weekdays']), random);
-    for (const meaning of ['неделя', 'суббота'])
-      expect(reverse.find((question) => question.prompt === meaning)?.answers).toEqual(['շաբաթ']);
+    const reverse = vocabularyQuestions(settings('ru-hy', ids), random);
+    for (const meaning of ['неделя', 'суббота']) {
+      const questions = reverse.filter((question) => question.prompt === meaning);
+      expect(questions.map((question) => question.answers)).toEqual([['շաբաթ']]);
+    }
   });
 
   it('принимает оба перевода для ներեցեք и կներեք в обоих направлениях', () => {
@@ -107,9 +113,11 @@ describe('словарные вопросы', () => {
 
   it('берёт неправильные варианты из той же темы, когда их достаточно', () => {
     for (const direction of ['hy-ru', 'ru-hy'] as const) {
-      for (const question of vocabularyQuestions(settings(direction), random)) {
-        const topic = vocabularySets.find((set) => set.entryIds.includes(question.entries[0].id))!;
-        const topicEntries = selectedVocabularyEntries([topic.id]);
+      const setup = settings(direction);
+      for (const question of vocabularyQuestions(setup, random)) {
+        const topics = vocabularySets.filter((set) => setup.setIds.includes(set.id) &&
+          question.entries.some((entry) => set.entryIds.includes(entry.id)));
+        const topicEntries = selectedVocabularyEntries(topics.map((set) => set.id));
         const values = topicEntries.map((entry) => direction === 'hy-ru' ? entry.meanings.join('; ') : entry.hy);
         expect(question.options.every((option) => values.includes(option))).toBe(true);
       }
@@ -207,6 +215,7 @@ describe('расширенные тематические наборы', () => {
       'husbands-mother', 'husbands-mother-colloquial', 'husbands-father', 'husbands-father-colloquial',
       'godfather', 'godfather-colloquial', 'godmother', 'godmother-colloquial',
       'husband', 'wife', 'grandchild', 'parent',
+      'mom', 'dad', 'grandma', 'grandpa',
     ].sort());
     const forward = vocabularyQuestions(settings('hy-ru', ['family', 'extended-family']), random);
     for (const [hy, answer] of [
@@ -235,13 +244,40 @@ describe('расширенные тематические наборы', () => {
   it('сохраняет армянскую вопросительную пунктуацию и пометки разговорных указательных слов', () => {
     const ids = ['demonstratives-and-questions'];
     const reverse = vocabularyQuestions(settings('ru-hy', ids), random);
-    expect(reverse.find((q) => q.prompt === 'кто')?.answers).toEqual(['ո՞վ']);
-    expect(reverse.find((q) => q.prompt === 'что')?.answers).toEqual(['ի՞նչ']);
-    for (const [meaning, standard, colloquial] of [['этот', 'այս', 'էս'], ['тот', 'այն', 'էն']]) {
+    for (const [meaning, hy] of [['кто', 'ո՞վ'], ['что', 'ի՞նչ'], ['где', 'որտե՞ղ'], ['куда', 'ո՞ւր']])
+      expect(reverse.find((q) => q.prompt === meaning)?.answers).toEqual([hy]);
+    for (const [meaning, standard, colloquial] of [
+      ['этот', 'այս', 'էս'], ['тот', 'այն', 'էն'], ['как', 'ինչպե՞ս', 'ո՞նց'],
+      ['да', 'այո', 'հա'], ['нет', 'ոչ', 'չէ'],
+    ]) {
       const question = reverse.find((q) => q.prompt === meaning)!;
       expect(question.answers).toEqual([standard, colloquial]);
       expect(question.entries.find((entry) => entry.hy === colloquial)?.colloquial).toBe(true);
       expect(question.entries.find((entry) => entry.hy === standard)?.colloquial).toBeUndefined();
     }
+  });
+
+  it('использует общие записи в обеих темах и объединяет подходящие формы', () => {
+    for (const [hy, firstSet, secondSet] of [
+      ['շաբաթ', 'weekdays', 'time-and-calendar'],
+      ['լեզու', 'study', 'body-parts'],
+      ['ձուկ', 'food', 'animals'],
+      ['ամպ', 'seasons-and-weather', 'nature'],
+      ['արև', 'seasons-and-weather', 'nature'],
+    ]) {
+      const entry = vocabularyEntries.find((item) => item.hy === hy);
+      expect(entry).toBeDefined();
+      expect(selectedVocabularyEntries([firstSet])).toContain(entry);
+      expect(selectedVocabularyEntries([secondSet])).toContain(entry);
+    }
+
+    const forward = vocabularyQuestions(settings('hy-ru', ['qualities', 'seasons-and-weather']), random);
+    expect(forward.find((q) => q.prompt === 'բարձր')?.answers).toEqual(['высокий; громкий']);
+    expect(forward.find((q) => q.prompt === 'ցուրտ')?.answers).toEqual(['холодный; холодно']);
+    const reverse = vocabularyQuestions(settings('ru-hy', ['body-parts', 'nature']), random);
+    expect(reverse.find((q) => q.prompt === 'гора')?.answers).toEqual(['սար', 'լեռ']);
+    expect(reverse.find((q) => q.prompt === 'щека')?.entries).toMatchObject([
+      { hy: 'այտ' }, { hy: 'թուշ', colloquial: true },
+    ]);
   });
 });

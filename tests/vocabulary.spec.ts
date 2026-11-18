@@ -1,20 +1,22 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { vocabularyEntries, vocabularySets } from '../src/data/vocabulary.ts';
-import type { VocabularyDirection } from '../src/data/types.ts';
+import type { VocabularyDirection, VocabularyEntry } from '../src/data/types.ts';
 
 const heading = 'Выбери наборы для тренировки';
 const directionLabels = { 'hy-ru': 'Армянский → русский', 'ru-hy': 'Русский → армянский' };
-const setEntries = (id: string) => vocabularyEntries.filter((entry) =>
-  vocabularySets.find((set) => set.id === id)!.entryIds.includes(entry.id));
+const setEntries = (...setIds: string[]) => {
+  const entryIds = new Set(vocabularySets.filter((set) => setIds.includes(set.id)).flatMap((set) => set.entryIds));
+  return vocabularyEntries.filter((entry) => entryIds.has(entry.id));
+};
 
 const addedSets = [
-  ['professions', 'Профессии и занятия', 13],
-  ['qualities', 'Качества и свойства', 13],
-  ['home', 'Дом и повседневные предметы', 12],
-  ['study', 'Учёба и учебные принадлежности', 12],
-  ['demonstratives-and-questions', 'Указательные и вопросительные слова', 9],
-  ['family', 'Семья: близкие родственники', 16],
+  ['professions', 'Профессии и занятия', 22],
+  ['qualities', 'Качества и свойства', 27],
+  ['home', 'Дом и повседневные предметы', 22],
+  ['study', 'Учёба и учебные принадлежности', 20],
+  ['demonstratives-and-questions', 'Указательные и вопросительные слова', 16],
+  ['family', 'Семья: близкие родственники', 20],
   ['extended-family', 'Семья: другие родственники', 20],
 ] as const;
 
@@ -27,17 +29,17 @@ async function startWords(page: Page, title: string, direction: VocabularyDirect
   await expect(page.getByRole('region', { name: 'Тренировка слов' })).toBeVisible();
 }
 
-async function currentWord(page: Page, direction: VocabularyDirection) {
+async function currentWord(page: Page, direction: VocabularyDirection, selected: readonly VocabularyEntry[]) {
   const prompt = await page.locator('.vocabulary-prompt').innerText();
-  const entries = vocabularyEntries.filter((entry) =>
+  const entries = selected.filter((entry) =>
     direction === 'hy-ru' ? entry.hy === prompt : entry.meanings.includes(prompt));
   expect(entries.length).toBeGreaterThan(0);
   const answers = direction === 'hy-ru' ? [entries[0].meanings.join('; ')] : entries.map((entry) => entry.hy);
   return { prompt, entries, answers };
 }
 
-async function answerWord(page: Page, direction: VocabularyDirection, wrong = false) {
-  const question = await currentWord(page, direction);
+async function answerWord(page: Page, direction: VocabularyDirection, selected: readonly VocabularyEntry[], wrong = false) {
+  const question = await currentWord(page, direction, selected);
   const options = await page.locator('.option').allTextContents();
   const value = wrong ? options.find((option) => !question.answers.includes(option))!
     : direction === 'ru-hy' ? (question.entries.find((entry) => entry.colloquial)?.hy ?? question.answers[0])
@@ -57,18 +59,19 @@ for (const direction of ['hy-ru', 'ru-hy'] as const) {
       const region = page.getByRole('region', { name: title, exact: true });
       await region.getByText('Посмотреть слова', { exact: true }).click();
       await expect(region.locator('.vocabulary-list li')).toHaveCount(count);
-      for (const entry of setEntries(id)) {
+      const entries = setEntries(id);
+      for (const entry of entries) {
         await expect(region.getByText(entry.hy, { exact: true })).toBeVisible();
         await expect(region.locator('.vocabulary-list li').filter({
           has: page.getByText(entry.hy, { exact: true }),
         })).toContainText(entry.meanings.join('; '));
       }
       await startWords(page, title, direction);
-      const expected = direction === 'hy-ru' ? setEntries(id).map((entry) => entry.hy)
-        : [...new Set(setEntries(id).flatMap((entry) => entry.meanings))];
+      const expected = direction === 'hy-ru' ? entries.map((entry) => entry.hy)
+        : [...new Set(entries.flatMap((entry) => entry.meanings))];
       const seen: string[] = [];
       while (await page.getByRole('region', { name: 'Тренировка слов' }).isVisible()) {
-        const question = await answerWord(page, direction);
+        const question = await answerWord(page, direction, entries);
         seen.push(question.prompt);
         await page.locator('.next-row button').click();
       }
@@ -77,25 +80,43 @@ for (const direction of ['hy-ru', 'ru-hy'] as const) {
     });
   }
 
-  test(`новые наборы вместе, ${direction}: общий материал без повторов`, async ({ page }) => {
+  test(`пересекающиеся темы вместе, ${direction}: общий материал без повторов`, async ({ page }) => {
+    const ids = ['weekdays', 'time-and-calendar', 'seasons-and-weather', 'nature'];
+    const entries = setEntries(...ids);
     await page.goto('/words');
-    for (const [, title] of addedSets)
+    for (const { title } of vocabularySets.filter((set) => ids.includes(set.id)))
       await page.getByRole('button', { name: title, exact: true }).click();
     await page.getByRole('radio', { name: directionLabels[direction], exact: true }).check();
     await page.getByRole('radio', { name: 'Все', exact: true }).check();
-    await page.getByRole('button', { name: /Начать тренировку/ }).click();
-    const entries = vocabularyEntries.filter((entry) => addedSets.some(([id]) => setEntries(id).includes(entry)));
     const expected = direction === 'hy-ru' ? entries.map((entry) => entry.hy)
       : [...new Set(entries.flatMap((entry) => entry.meanings))];
+    await page.getByRole('button', { name: `Начать тренировку · ${expected.length}`, exact: true }).click();
     const seen: string[] = [];
     while (await page.getByRole('region', { name: 'Тренировка слов' }).isVisible()) {
-      seen.push((await answerWord(page, direction)).prompt);
+      seen.push((await answerWord(page, direction, entries)).prompt);
       await page.locator('.next-row button').click();
     }
     expect(seen.sort()).toEqual(expected.sort());
     await expect(page.getByText(`Правильных ответов: ${seen.length} из ${seen.length}.`)).toBeVisible();
   });
 }
+
+test('новые темы доступны в списке и раскрывают свой материал', async ({ page }) => {
+  await page.goto('/words');
+  await expect(page.locator('.vocabulary-select')).toHaveCount(24);
+  for (const [title, count] of [
+    ['Продукты и еда', 32], ['Части тела', 27], ['Фрукты', 19],
+    ['Ягоды, орехи и сухофрукты', 15], ['Времена года и погода', 12], ['Время и календарь', 15],
+    ['Животные', 14], ['Природа', 16], ['Город и места', 10], ['Люди и общение', 10],
+    ['Эмоции и состояния', 16],
+  ] as const) {
+    const region = page.getByRole('region', { name: title, exact: true });
+    const details = region.getByText('Посмотреть слова', { exact: true });
+    await details.click();
+    await expect(region.locator('.vocabulary-list li')).toHaveCount(count);
+    await details.click();
+  }
+});
 
 test('наборы раскрываются независимо от выбора, настройки и счётчик сохраняются до перезагрузки', async ({ page }) => {
   await page.goto('/alphabet');
@@ -139,9 +160,10 @@ test('наборы раскрываются независимо от выбор
 
 for (const direction of ['hy-ru', 'ru-hy'] as const) {
   test(`${direction}: полный проход, повтор ошибки и новый запуск с исходными настройками`, async ({ page }) => {
+    const entries = setEntries('weekdays');
     await startWords(page, 'Дни недели', direction);
-    const expectedCount = direction === 'hy-ru' ? setEntries('weekdays').length
-      : new Set(setEntries('weekdays').flatMap((entry) => entry.meanings)).size;
+    const expectedCount = direction === 'hy-ru' ? entries.length
+      : new Set(entries.flatMap((entry) => entry.meanings)).size;
     const seen: string[] = [];
     const training = page.getByRole('region', { name: 'Тренировка слов' });
     while (await training.isVisible()) {
@@ -149,7 +171,7 @@ for (const direction of ['hy-ru', 'ru-hy'] as const) {
       await expect(page.locator('.vocabulary-direction')).toHaveText(directionLabels[direction]);
       await expect(page.locator('.vocabulary-explanation')).toHaveCount(0);
       await expect(page.locator('.option').first()).toBeFocused();
-      const question = await answerWord(page, direction, seen.length === 0);
+      const question = await answerWord(page, direction, entries, seen.length === 0);
       seen.push(question.prompt);
       await expect(page.locator('.vocabulary-explanation')).toContainText(question.entries[0].hy);
       await page.locator('.next-row button').click();
@@ -163,7 +185,7 @@ for (const direction of ['hy-ru', 'ru-hy'] as const) {
     await expect(page.locator('.vocabulary-prompt')).toHaveText(seen[0]);
     await expect(page.locator('.vocabulary-direction')).toHaveText(directionLabels[direction]);
     await expect(page.locator('.progress')).toContainText('Вопрос 1 из 1');
-    await answerWord(page, direction);
+    await answerWord(page, direction, entries);
     await page.getByRole('button', { name: 'Посмотреть результат' }).click();
     await expect(page.getByRole('button', { name: 'Повторить ошибки' })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'К выбору наборов', exact: true })).toBeVisible();
@@ -186,27 +208,29 @@ for (const direction of ['hy-ru', 'ru-hy'] as const) {
 }
 
 test('обратная тренировка принимает разговорные формы и показывает все правильные варианты', async ({ page }) => {
-  await startWords(page, 'Семья: близкие родственники', 'ru-hy');
+  const title = 'Указательные и вопросительные слова';
+  const entries = setEntries('demonstratives-and-questions');
+  await startWords(page, title, 'ru-hy');
   let alternatives = 0;
   while (await page.getByRole('region', { name: 'Тренировка слов' }).isVisible()) {
-    const question = await currentWord(page, 'ru-hy');
+    const question = await currentWord(page, 'ru-hy', entries);
     if (question.answers.length > 1) {
       await expect(page.locator('.prompt')).toHaveText('Выбери любой подходящий вариант');
       alternatives++;
     }
-    await answerWord(page, 'ru-hy');
+    await answerWord(page, 'ru-hy', entries);
     if (question.entries.some((entry) => entry.colloquial))
       await expect(page.locator('.vocabulary-explanation')).toContainText('(разг.)');
     await page.locator('.next-row button').click();
   }
   expect(alternatives).toBeGreaterThan(0);
-  const count = new Set(setEntries('family').flatMap((entry) => entry.meanings)).size;
+  const count = new Set(entries.flatMap((entry) => entry.meanings)).size;
   await expect(page.getByText(`Правильных ответов: ${count} из ${count}.`)).toBeVisible();
 });
 
 test('история восстанавливает ответы, вопросы не создают шагов, новая вкладка и перезагрузка сбрасывают сессию', async ({ page, context }) => {
   await startWords(page, 'Месяцы', 'hy-ru');
-  const first = await answerWord(page, 'hy-ru');
+  const first = await answerWord(page, 'hy-ru', setEntries('months'));
   await page.getByRole('link', { name: 'Грамматика', exact: true }).click();
   await page.goBack();
   await expect(page.locator('.vocabulary-prompt')).toHaveText(first.prompt);
@@ -259,13 +283,14 @@ for (const width of [390, 1280]) {
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: testInfo.outputPath(`words-${width}.png`), fullPage: true });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    for (const [direction, set, target] of [
-      ['hy-ru', 'Приветствия', 'Շնորհակալություն'],
-      ['ru-hy', 'Семья: другие родственники', 'тётя (папина сестра)'],
+    for (const [direction, id, set, target] of [
+      ['hy-ru', 'greetings', 'Приветствия', 'Շնորհակալություն'],
+      ['ru-hy', 'extended-family', 'Семья: другие родственники', 'тётя (папина сестра)'],
     ] as const) {
+      const entries = setEntries(id);
       await startWords(page, set, direction);
       while (await page.locator('.vocabulary-prompt').innerText() !== target) {
-        await answerWord(page, direction);
+        await answerWord(page, direction, entries);
         await page.locator('.next-row button').click();
       }
       await expect(page.locator('.vocabulary-prompt')).toHaveAttribute('lang', direction === 'hy-ru' ? 'hy' : 'ru');
@@ -273,7 +298,7 @@ for (const width of [390, 1280]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       expect(await page.locator('.option').evaluateAll((options) => options.every((option) => option.scrollWidth <= option.clientWidth + 1))).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`question-${direction}-${width}.png`), fullPage: true });
-      await answerWord(page, direction);
+      await answerWord(page, direction, entries);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`answer-${direction}-${width}.png`), fullPage: true });
     }
@@ -284,6 +309,7 @@ for (const width of [390, 1280]) {
 
 for (const direction of ['hy-ru', 'ru-hy'] as const) {
   test(`местоимения вместе, ${direction}: полный проход и разговорные ответы`, async ({ page }) => {
+    const entries = setEntries('personal-pronouns', 'possessive-pronouns');
     await page.goto('/words');
     for (const title of ['Базовые местоимения', 'Притяжательные местоимения'])
       await page.getByRole('button', { name: title, exact: true }).click();
@@ -292,7 +318,7 @@ for (const direction of ['hy-ru', 'ru-hy'] as const) {
     await page.getByRole('button', { name: /Начать тренировку/ }).click();
     const seen = new Set<string>();
     while (await page.getByRole('region', { name: 'Тренировка слов' }).isVisible()) {
-      const question = await answerWord(page, direction);
+      const question = await answerWord(page, direction, entries);
       expect(seen.has(question.prompt)).toBe(false);
       seen.add(question.prompt);
       await page.locator('.next-row button').click();
